@@ -20,31 +20,37 @@ We state Lemma~\ref{lemma:OptimalCondition}, which extends Lemma~7.1 in \cite{so
   则对\eqref{eq:Opt_A_general} 的任意最优解 $(C^{*},E^{*})$ 必然有
   $(C^{*})^T_i=\mathbf{0} \quad \forall i in T^c$.
 \end{lemma}
-%\begin{proof}
-%  For optimal solution $(c^{*},e^{*})$, we have:
-%  \begin{align}
-%    &\|c^*\|_1+\frac{\lambda}{2}\|e^*\|^2 \nonumber\\
-%    =& \|c^*_S\|_1+\|c^*_{T\cap S^c}\|_1+\|c^*_{T^c}\|_1 + \frac{\lambda}{2} \|e^*\|^2\nonumber\\
-%    \geq&\|c_S\|_1+\langle sgn(c_S),c^*_S-c_S\rangle+\|c^*_{T\cap S^c}\|_1+\|c^*_{T^c}\|_1
-%    +\frac{\lambda}{2} \|e\|^2 +\langle \lambda e,e^*-e\rangle\nonumber\\
-%    =&\|c_S\|_1+\langle \nu,A_S(c^*_S-c_S)\rangle+\|c^*_{T\cap S^c}\|_1+\|c^*_{T^c}\|_1
-%    +\frac{\lambda}{2} \|e\|^2 +\langle \nu,e^*-e\rangle\nonumber\\
-%    =&\|c_S\|_1+\frac{\lambda}{2} \|e\|^2+ \|c^*_{T\cap S^c}\|_1-\langle \nu,A_{T\cap S^c}(c^*_{T\cap S^c})\rangle
-%    +\|c^*_{T^c}\|_1-\langle \nu,A_{T^c}(c^*_{T^c})\rangle. \label{eq:lemma_tmp1}
-%  \end{align}
-%  To see $\frac{\lambda}{2} \|e^*\|^2 \geq \frac{\lambda}{2} \|e\|^2 +\langle \lambda e,e^*-e\rangle$, note that the right hand side equals to $\lambda\left(-\frac{1}{2}e^Te +(e^*)^Te\right)$, which takes a maximal value of $\frac{\lambda}{2} \|e^*\|^2$ when $e=e^*$.
-%  The last equation holds because both $(c,e)$ and $(c^*,e^*)$ are feasible solution, such that $\langle\nu,A(c^*-c)\rangle+\langle\nu,e^*-e\rangle = \langle\nu,Ac^*+e^*-(Ac+e)\rangle=0$. Also, note that $\|c_S\|_1+\frac{\lambda}{2} \|e\|^2=\|c\|_1+\frac{\lambda}{2} \|e\|^2$.
-%
-%  With the inequality constraints of $\nu$ given in the lemma statement, we have
-%  \begin{align*}
-%    \langle \nu,A_{T\cap S^c}(c^*_{T\cap S^c})\rangle=&\langle A_{T\cap S^c}^T\nu,(c^*_{T\cap S^c})\rangle
-%    \leq \|A^T_{T\cap S^{c}}\nu\|_{\infty}\|c^*_{T\cap S^c}\|_1\leq\|c^*_{T\cap S^c}\|_1.
-%  \end{align*}
-%  Substitute into \eqref{eq:lemma_tmp1}, we get:
-%  \begin{equation*}
-%    \|c^*\|_1+\frac{\lambda}{2} \|e^*\|^2 \geq \|c\|_1+\frac{\lambda}{2} \|e\|^2 +(1-\|A^T_{T^{c}}\nu\|_{\infty})\|c^*_{T^c}\|_1,
-%  \end{equation*}
-%  where $(1-\|A^T_{T^{c}}\nu\|_{\infty})$ is strictly greater than $0$.
-%
-%  Using the fact that $(c^*,e^*)$ is an optimal solution, $\|c^*\|_1+\frac{\lambda}{2} \|e^*\|^2\leq \|c\|_1+\frac{\lambda}{2} \|e\|^2$. Therefore, $\|c^*_{T^c}\|_1=0$ and $(c,e)$ is also an optimal solution. This concludes the proof.
-  \end{document}
+
+\begin{proof}
+  对最优解 $(C^{*},E^{*})$, 我们有：
+  \begin{align}
+    &\|(C^*)^T\|_{2,1}+\frac{\lambda}{2}\|E^*\|_F^2 \nonumber\\
+    =& \|(C^*)^T_S\|_{2,1}+\|(C^*)^T_{T\cap
+    S^c}\|_{2,1}+\|(C^*)^T_{T^c}\|_{2,1} + \frac{\lambda}{2} \|E^*\|^2_F\nonumber\\
+    \geq&\|C^T_S\|_{2,1}+\langle norm(C_S),C^*_S-C_S\rangle+\|(C^*)^T_{T\cap
+    S^c}\|_{2,1}+\|(C^*)^T_{T^c}\|_{2,1} + \frac{\lambda}{2} \|E\|^2_F +\langle
+    \lambda E,E^*-E\rangle\nonumber\\
+    =&\|C^T_S\|_{2,1}+\langle N,X_S(C^*_S-C_S)\rangle+\|(C^*)^T_{T\cap
+    S^c}\|_{2,1}+\|(C^*)^T_{T^c}\|_{2,1} + \frac{\lambda}{2} \|E\|^2_F +\langle
+    \lambda E,E^*-E\rangle\nonumber\\
+    =&\|C^T_S\|_{2,1}+\frac{\lambda}{2} \|E\|_F^2+ \|(C^*)^T_{T\cap
+    S^c}\|_{2,1}-\langle N,X_{T\cap S^c}C^*_{T\cap S^c}\rangle
+    +\|(C^*)^T_{T^c}\|_{2,1}-\langle N,X_{T^c}C^*_{T^c}\rangle. \label{eq:lemma_tmp1}
+  \end{align}
+  其中 $\frac{\lambda}{2} \|E^*\|_F^2 \geq \frac{\lambda}{2} \|E\|_F^2 +\langle
+  \lambda E,E^*-E\rangle$ 可由Cauchy–Schwarz不等式推得。
+  最后一个等式成立是因为 $(C,E)$和$(C^*,E^*)$都是可行解, 因此$\langle\nu,A((C^*)^T-c)\rangle+\langle\nu,e^*-e\rangle = \langle\nu,A(C^*)^T+e^*-(Ac+e)\rangle=0$. Also, note that $\|c_S\|_1+\frac{\lambda}{2} \|e\|^2=\|c\|_1+\frac{\lambda}{2} \|e\|^2$.
+
+  With the inequality constraints of $\nu$ given in the lemma statement, we have
+  \begin{align*}
+    \langle \nu,A_{T\cap S^c}((C^*)^T_{T\cap S^c})\rangle=&\langle A_{T\cap S^c}^T\nu,((C^*)^T_{T\cap S^c})\rangle
+    \leq \|A^T_{T\cap S^{c}}\nu\|_{\infty}\|(C^*)^T_{T\cap S^c}\|_1\leq\|(C^*)^T_{T\cap S^c}\|_1.
+  \end{align*}
+  Substitute into \eqref{eq:lemma_tmp1}, we get:
+  \begin{equation*}
+    \|(C^*)^T\|_1+\frac{\lambda}{2} \|e^*\|^2 \geq \|c\|_1+\frac{\lambda}{2} \|e\|^2 +(1-\|A^T_{T^{c}}\nu\|_{\infty})\|(C^*)^T_{T^c}\|_1,
+  \end{equation*}
+  where $(1-\|A^T_{T^{c}}\nu\|_{\infty})$ is strictly greater than $0$.
+
+  Using the fact that $((C^*)^T,e^*)$ is an optimal solution, $\|(C^*)^T\|_1+\frac{\lambda}{2} \|e^*\|^2\leq \|c\|_1+\frac{\lambda}{2} \|e\|^2$. Therefore, $\|(C^*)^T_{T^c}\|_1=0$ and $(c,e)$ is also an optimal solution. This concludes the proof.
+\end{document}
