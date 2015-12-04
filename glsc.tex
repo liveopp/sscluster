@@ -1,3 +1,50 @@
-/documentclass{ctexart}
-/begin{document}
-/end{document}
+\documentclass{ctexart}
+\usepackage{amsmath, amsthm, amssymb}
+
+\begin{document}
+考虑一个一般的凸优化问题：
+\begin{equation}\label{eq:Opt_A_general}
+  \begin{aligned}
+    \quad \min_{C, E} \; &\|C^T\|_{2,1}+\frac{\lambda}{2}\|E\|^2_F \quad &s.t. \quad Y=Xc+E.
+  \end{aligned}
+\end{equation}
+We state Lemma~\ref{lemma:OptimalCondition}, which extends Lemma~7.1 in \cite{soltanolkotabi2011geometric}.
+\begin{lemma}\label{lemma:OptimalCondition}
+  考虑矩阵$X\in \mathbb{R}^{d\times n}$和矩阵$Y \in \mathbb{R}^{d\times n}$.
+  如果存在三元组 $(C,E,N)$ 满足 $Y=XC+E$, $C$ 的行支撑集 $S\subseteq T$，$N$满足
+  \begin{align*}
+    N^T X_i = \frac{C^T_i}{\| C^T_i\|_2} \quad \forall i \in S,  & N=\lambda E, \\
+    \|N^T X_{T\cap S^{c}}\|_{2, \infty} \leq 1, & \|N^T X_{T^{c}}\|_{2, \infty}<1,
+  \end{align*}
+
+  则对\eqref{eq:Opt_A_general} 的任意最优解 $(C^{*},E^{*})$ 必然有
+  $(C^{*})^T_i=\mathbf{0} \quad \forall i in T^c$.
+\end{lemma}
+%\begin{proof}
+%  For optimal solution $(c^{*},e^{*})$, we have:
+%  \begin{align}
+%    &\|c^*\|_1+\frac{\lambda}{2}\|e^*\|^2 \nonumber\\
+%    =& \|c^*_S\|_1+\|c^*_{T\cap S^c}\|_1+\|c^*_{T^c}\|_1 + \frac{\lambda}{2} \|e^*\|^2\nonumber\\
+%    \geq&\|c_S\|_1+\langle sgn(c_S),c^*_S-c_S\rangle+\|c^*_{T\cap S^c}\|_1+\|c^*_{T^c}\|_1
+%    +\frac{\lambda}{2} \|e\|^2 +\langle \lambda e,e^*-e\rangle\nonumber\\
+%    =&\|c_S\|_1+\langle \nu,A_S(c^*_S-c_S)\rangle+\|c^*_{T\cap S^c}\|_1+\|c^*_{T^c}\|_1
+%    +\frac{\lambda}{2} \|e\|^2 +\langle \nu,e^*-e\rangle\nonumber\\
+%    =&\|c_S\|_1+\frac{\lambda}{2} \|e\|^2+ \|c^*_{T\cap S^c}\|_1-\langle \nu,A_{T\cap S^c}(c^*_{T\cap S^c})\rangle
+%    +\|c^*_{T^c}\|_1-\langle \nu,A_{T^c}(c^*_{T^c})\rangle. \label{eq:lemma_tmp1}
+%  \end{align}
+%  To see $\frac{\lambda}{2} \|e^*\|^2 \geq \frac{\lambda}{2} \|e\|^2 +\langle \lambda e,e^*-e\rangle$, note that the right hand side equals to $\lambda\left(-\frac{1}{2}e^Te +(e^*)^Te\right)$, which takes a maximal value of $\frac{\lambda}{2} \|e^*\|^2$ when $e=e^*$.
+%  The last equation holds because both $(c,e)$ and $(c^*,e^*)$ are feasible solution, such that $\langle\nu,A(c^*-c)\rangle+\langle\nu,e^*-e\rangle = \langle\nu,Ac^*+e^*-(Ac+e)\rangle=0$. Also, note that $\|c_S\|_1+\frac{\lambda}{2} \|e\|^2=\|c\|_1+\frac{\lambda}{2} \|e\|^2$.
+%
+%  With the inequality constraints of $\nu$ given in the lemma statement, we have
+%  \begin{align*}
+%    \langle \nu,A_{T\cap S^c}(c^*_{T\cap S^c})\rangle=&\langle A_{T\cap S^c}^T\nu,(c^*_{T\cap S^c})\rangle
+%    \leq \|A^T_{T\cap S^{c}}\nu\|_{\infty}\|c^*_{T\cap S^c}\|_1\leq\|c^*_{T\cap S^c}\|_1.
+%  \end{align*}
+%  Substitute into \eqref{eq:lemma_tmp1}, we get:
+%  \begin{equation*}
+%    \|c^*\|_1+\frac{\lambda}{2} \|e^*\|^2 \geq \|c\|_1+\frac{\lambda}{2} \|e\|^2 +(1-\|A^T_{T^{c}}\nu\|_{\infty})\|c^*_{T^c}\|_1,
+%  \end{equation*}
+%  where $(1-\|A^T_{T^{c}}\nu\|_{\infty})$ is strictly greater than $0$.
+%
+%  Using the fact that $(c^*,e^*)$ is an optimal solution, $\|c^*\|_1+\frac{\lambda}{2} \|e^*\|^2\leq \|c\|_1+\frac{\lambda}{2} \|e\|^2$. Therefore, $\|c^*_{T^c}\|_1=0$ and $(c,e)$ is also an optimal solution. This concludes the proof.
+  \end{document}
