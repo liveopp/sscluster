@@ -9,7 +9,7 @@
 \author{张航}
 \maketitle
 
-\section{Introduction}
+\section{简介}
 
 子空间聚类问题来自于很多实际的应用，包括运动轨迹分离~\cite{costeira1998motion_seg}，
 人脸识别~\cite{basri2003lambertianface}，网络跳点计数~\cite{eriksson2011high_rankMC}，
@@ -34,10 +34,11 @@
 ~\cite{lauer2009spectral,chen2009spectral}，自底向上的局部采样方法~\cite{yan2006LSA,rao2008motion}，
 以及基于凸优化的方法，比如低秩表示（Low Rank Representation）~\cite{liu2010lrr_icml,liu2013LRR}
 和稀疏子空间聚类（Sparse Subspace Clustering）~\cite{elhamifar2009ssc,elhamifar2012ssc_journal}。
-For a comprehensive survey and comparisons, we refer the readers to the tutorial~\cite{vidal2011tutorial}. Among these algorithms, SSC is known to enjoy superb empirical performance, {\em even for noisy data}. For example, it
-is the state-of-the-art algorithm for motion segmentation on Hopkins155 benchmark~\cite{tron2007benchmark,elhamifar2009ssc}, and has been shown to be more robust than LRR as the number of clusters increase~\cite{elhamifar2012ssc_journal}.
+这些算法中，SSC是最优秀的之一，尤其当数据有噪音时，表现地相对稳健和鲁棒，例如在运动分割领域的
+Hopkins155~\cite{tron2007benchmark,elhamifar2009ssc}测试集上，SSC是目前公认的表现最好的算法，
+并且当类别增多时，它表现得比 LRR 更好~\cite{elhamifar2012ssc_journal}。
 
-The key idea of SSC is to represent each data point by a sparse linear combination of the remaining data points using $\ell_1$ minimization. Without introducing the notations (which is deferred in Section~\ref{sec:prob_setup}), the noiseless and noisy version of SSC solve respectively
+SSC 算法的关键是将每个数据点线性表示，由于每个点都在一个低维子空间data point by a sparse linear combination of the remaining data points using $\ell_1$ minimization. Without introducing the notations (which is deferred in Section~\ref{sec:prob_setup}), the noiseless and noisy version of SSC solve respectively
 \begin{align*}
   \min_{c_i} \|c_i\|_1\quad s.t.\quad x_i=X_{-i}c_i, && \text{and}&& \min_{c_i} \|c_i\|_1+\frac{\lambda}{2}\|x_i-X_{-i}c_i\|^2,
 \end{align*}
