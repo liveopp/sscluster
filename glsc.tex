@@ -38,11 +38,38 @@
 Hopkins155~\cite{tron2007benchmark,elhamifar2009ssc}测试集上，SSC是目前公认的表现最好的算法，
 并且当类别增多时，它表现得比 LRR 更好~\cite{elhamifar2012ssc_journal}。
 
-SSC 算法的关键是将每个数据点线性表示，由于每个点都在一个低维子空间data point by a sparse linear combination of the remaining data points using $\ell_1$ minimization. Without introducing the notations (which is deferred in Section~\ref{sec:prob_setup}), the noiseless and noisy version of SSC solve respectively
+SSC
+算法的关键是将每个数据点用其他点线性表示，由于每个点都在一个低维子空间中，则一定存在一个相对稀疏的表示，
+只用到同一个子空间中的点。如果把系数大小看作两个点的连接权重，我们可以得到一个无向图，再对这个图进行谱聚类，
+即可将不同子空间的点分开。如果用第~\ref{sec:prob_setup}节中的符号描述，那么无噪音和有噪音的 SSC 分别求解
 \begin{align*}
-  \min_{c_i} \|c_i\|_1\quad s.t.\quad x_i=X_{-i}c_i, && \text{and}&& \min_{c_i} \|c_i\|_1+\frac{\lambda}{2}\|x_i-X_{-i}c_i\|^2,
+  \min_{c_i} \|c_i\|_1\quad s.t.\quad X_i=X_{\{i\}^c}c_i, \\
+  \min_{c_i} \|c_i\|_1+\frac{\lambda}{2}\|X_i-X_{\{i\}^c}c_i\|^2,
 \end{align*}
-for each data column $x_i$, and the hope is that $c_i$ will be supported only on indices of the data points from the same subspace as $x_i$. While this formulation is for linear subspaces, affine subspaces can also be dealt with by augmenting data points with an offset variable $1$.
+$X_i$ 表示数据矩阵的第$i$ 列， $c_i$ 是$X_i$ 用其他所有点表示的系数，我们希望其非零元素对应的数据点都和 $x_i$ 在同一个子空间。
+对于仿射子空间，SSC 同样适用，只需要加上 $c_i = i$的限制。
+
+然而，在 SSC 中，我们每次只考虑一个点当对于其他点的表示
+表示向量$c$ 是独立优化的。
+to a single-task framework wherein the representation for
+each data point is found independently. Whilst this simplifies
+the formulation, it lacks optimality due to the existence of
+inherent joint structure between the representations of data
+points. As all data points use the same ‘dictionary’, some
+of the words in that dictionary might be outstanding and
+most point would refer to. This indicates that the sparse
+coefficients of these exemplar data points are likely to be
+seen significant across different representations for many
+data points. But on the other hand, the representation for
+each data point still needs to respect the sparse subspace
+assumption. 事实上，压缩感知中的 joint sparse 模型[1]  [17] 很好地满足了我们的需求。
+另一方面
+improve the basic sparsity modeling. We note that though
+LRR is formulated for all data points at a time using the lowrank
+principle, there is no actual explicit group concept and
+thus the definition of tasks is vague and exploiting shared
+structure is impossible. Thus, extending SSC modeling to
+incorporate the joint sparsity concept is desirable.
 
 Effort has been made to explain the practical success of SSC by analyzing the noiseless version. \cite{elhamifar2010ssc_icassp} show that under certain conditions, \emph{disjoint} subspaces (i.e., they are not overlapping) can be exactly recovered.
 %Similar guarantee, under stronger ``independent subspace'' condition, was provided for LRR in a much earlier analysis\cite{kanatani2001motion}.
