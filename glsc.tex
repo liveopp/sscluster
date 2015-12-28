@@ -1,6 +1,7 @@
 \documentclass{ctexart}
 \usepackage{amsmath,amsthm,amssymb}
 \usepackage{graphicx,subcaption}
+\usepackage{algorithm,algpseudocode}
 \usepackage{glsc}
 
 \begin{document}
@@ -38,8 +39,7 @@
 Hopkins155~\cite{tron2007benchmark,elhamifar2009ssc}测试集上，SSC是目前公认的表现最好的算法，
 并且当类别增多时，它表现得比 LRR 更好~\cite{elhamifar2012ssc_journal}。
 
-SSC
-算法的关键是将每个数据点用其他点线性表示，由于每个点都在一个低维子空间中，则一定存在一个相对稀疏的表示，
+SSC算法的关键是将每个数据点用其他点线性表示，由于每个点都在一个低维子空间中，则一定存在一个相对稀疏的表示，
 只用到同一个子空间中的点。如果把系数大小看作两个点的连接权重，我们可以得到一个无向图，再对这个图进行谱聚类，
 即可将不同子空间的点分开。如果用第~\ref{sec:prob_setup}节中的符号描述，那么无噪音和有噪音的 SSC 分别求解
 \begin{align*}
@@ -49,27 +49,23 @@ SSC
 $X_i$ 表示数据矩阵的第$i$ 列， $c_i$ 是$X_i$ 用其他所有点表示的系数，我们希望其非零元素对应的数据点都和 $x_i$ 在同一个子空间。
 对于仿射子空间，SSC 同样适用，只需要加上 $c_i = i$的限制。
 
-然而，在 SSC 中，我们每次只考虑一个点当对于其他点的表示
-表示向量$c$ 是独立优化的。
-to a single-task framework wherein the representation for
-each data point is found independently. Whilst this simplifies
-the formulation, it lacks optimality due to the existence of
-inherent joint structure between the representations of data
-points. As all data points use the same ‘dictionary’, some
-of the words in that dictionary might be outstanding and
-most point would refer to. This indicates that the sparse
+然而，在 SSC 中，我们每次只考虑一个点相对于其他点的表示，
+比较容易受到噪音和异常点的干扰。如果我们预先知道点$A,B,C$
+属于同一类，然后寻找其他几个点能同时表示$A,B,C$，这无疑比
+单独考虑$A$ 或 $B$ 或 $C$ 更稳健。另一方面，在SSC 模型中，
+我们只是要求稀疏尽量稀疏，如此产生的邻接矩阵，不一定能在
+接下来的谱聚类中有比较好的可分性。如果我们能让表示向量的非零元
+集中在某些位置，那么邻接矩阵将具有更好的结构（具体可见第\ref{sec:experiments}节）
+
+基于上面的考虑，本文提出了一种新的子空间聚类方法，它的核心内容有两步：
+首先根据点的空间信息，将某些很可能是一类的点聚在一起。然后我们在剩余的
+点中，寻找能同时表示它们的点，进而构造邻接矩阵。
 coefficients of these exemplar data points are likely to be
 seen significant across different representations for many
 data points. But on the other hand, the representation for
 each data point still needs to respect the sparse subspace
 assumption. 事实上，压缩感知中的 joint sparse 模型[1]  [17] 很好地满足了我们的需求。
 另一方面
-improve the basic sparsity modeling. We note that though
-LRR is formulated for all data points at a time using the lowrank
-principle, there is no actual explicit group concept and
-thus the definition of tasks is vague and exploiting shared
-structure is impossible. Thus, extending SSC modeling to
-incorporate the joint sparsity concept is desirable.
 
 Effort has been made to explain the practical success of SSC by analyzing the noiseless version. \cite{elhamifar2010ssc_icassp} show that under certain conditions, \emph{disjoint} subspaces (i.e., they are not overlapping) can be exactly recovered.
 %Similar guarantee, under stronger ``independent subspace'' condition, was provided for LRR in a much earlier analysis\cite{kanatani2001motion}.
@@ -220,35 +216,67 @@ $\mathrm{Proj}_{\mathcal{S}}$ 表示子空间 $\mathcal{S}$
 $\norm(X)$是将$X$的每一列归一化（$X_i \neq \mathbf{0}$），$\langle X, Y \rangle
 := \tr(X^T Y)$。
 
-\paragraph{算法： }
-Original SSC solves the linear program
-    \begin{equation}\label{eq:SSC}
-    \begin{aligned}
+\subsection{初步聚类}
+我们第一步是将数据点分成若干组，使得每一组里的点属于同一个子空间。为了做到这点
+必须利用数据的空间性质。事实上，当采样点充分且子空间之间分离性较好时，一个数据点的邻居很可能
+与它是同一类。这种性质在很多实际应用中天然满足，比如运用分割中，位置比较接近的点很可能来自
+同一个物体。
+
+然而如果只考虑数据点的邻居，这无疑忽略了线性空间的性质，于是我们定义一个新的点到点集距离：
+\begin{definition}[点到空间距离]\label{def:space_distance}
+  设$x\in \R^d, X\in \R^{d\times n}$，$k$为给定正整数，我们有距离函数
+  $$ d(x, X, k) = \begin{cases} \|x -\cP_{U_{1:k}} x\|_2 & \text{非仿射空间}\\
+    \|x - \cP{\tU_{1:k}} x\|_2 & \text{仿射空间} \end{cases},$$
+  其中$U$为$X$svd的左奇异向量矩阵，$\tU$为$\tX=X-\frac{1}{n}\sum_{i=1}^n
+  X_i$的svd左奇异向量矩阵。
+\end{definition}
+如果我们已经有了$n$个点那么就可以再取下一个离点集最近的点。
+
+下一个问题是每一组应该选取多少个点，如果取得过少，不能很好的发挥Group LASSO
+和Multitasking 的作用，如果过多，很可能有错误点。
+
+\begin{algorithm} \caption{拓展最近邻}
+  \begin{algorithmic} \label{alg:nsn}
+    \Require $n$ 个样本点 $\mathcal{X} = \{x_1,\ldots,x_n\}$, 所需邻居的个数
+    $K$， 邻域子间维度 $k_{\max}$.
+    \Ensure 所有样本点的分组$\Omega$
+    \State $m=1$
+    \Repeat
+      \State 从$\cX$中任选一个点$x_0$
+      \State $\set{S}_m \gets \{x_0\}$ \Comment{$x_0$点张成的子空间}
+      \For {$k = 1,\ldots,K$} \Comment{依次将最近邻加入子空间集合}
+        \State $x^* \gets \argmin_{x \in \cX  \setminus \set{S}_m} d(x, S_m,
+        k_{\max})$
+        \State $\set{S}_m \gets \set{S}_m \cup \{x^*\}$
+      \EndFor
+      \State $\Omega \gets \Omega \cup \set{S}_m$
+      \State $cX \gets \cX \setminus \set{S}_m$
+      \State $m=m+1$
+    \Until{$\cX$ 为空}
+  \end{algorithmic}
+\end{algorithm}
+
+算法 \ref{alg:nsn} 将样本点分成SN collects $K$ neighbors sequentially for each point. At each step $k$, a
+$k$-dimensional subspace $\set{U}$ spanned by the point and its $k-1$ neighbors
+is constructed, and the point closest to the subspace is newly collected. After
+$k \ge k_{\max}$, the subspace $\set{U}$ constructed at the $k_{\max}$th step
+is used for collecting neighbors. At last, if there are more points lying on
+$\set{U}$, they are also counted as neighbors. The subspace $\set{U}$ can be
+stored in the form of a matrix $U \in \mathbb{R}^{p \times
+  \text{dim}(\set{U})}$ whose columns form an orthonormal basis of $\set{U}$.
+  Then $\|\proj_{\set{U}} y_j\|_2$ can be computed easily because it is equal
+  to $\|U^\top y_j\|_2$. While a naive implementation requires $O(K^2pN^2)$
+  computational cost, this can be reduced to $O(KpN^2)$, and the faster
+  which solve a convex program with $N^2$ variables and $pN$ constraints.
+
+\subsection{Group LASSO 和 Multitasking}
+原有的 SSC 方法，主要求解下面的优化问题
+\begin{equation}\label{eq:SSC}
+  \begin{aligned}
     \min_{c_i} \; \|c_i\|_1 \quad s.t. \quad &x_i=X_{I^c}c_i,
-    \end{aligned}
-    \end{equation}
+  \end{aligned}
+\end{equation}
 for each data point $x_i$. Solutions are arranged into matrix $C=[c_1,...,c_N]$, then spectral clustering techniques such as \cite{ng2002spectral} are applied on the affinity matrix $W=|C|+|C|^T$ ($|\cdot|$ represents entrywise absolute value). Note that when $Z\neq 0$, this method breaks down: indeed \eqref{eq:SSC} may even be infeasible.
-
-
-%\begin{algorithm}[tb]
-%   \caption{Sparse Subspace Clustering}
-%   \label{alg:SSC}
-%\begin{algorithmic}
-%   \STATE {\bfseries Input:}
-%   Data points as columns in $X\in \mathbb{R}^{n\times N}$.
-%   \STATE{1. } For each data point $x_i$, solve
-%    \begin{equation}\label{eq:SSC}
-%    \begin{aligned}
-%    \min_{c_i} \; \|c_i\|_1 \quad s.t. \quad &x_i=X_{I^c}c_i
-%    \end{aligned}
-%    \end{equation}
-%   \STATE{2. } Let $C:=[c_1,...,c_N]$. Form affinity graph $G$ that is represented by adjacency matrix $W=|C|+|C|^T$.
-%   \STATE{3. } Estimate the number of subspace by finding the largest eigenvalue gap of normalized Laplacian of $G$ via
-%$$\hat{L}=N-\underset{i=1,...,N-1}{\text{argmax}}\; \sigma_i-\sigma_{i+1}$$
-%   \STATE{4. } Apply spectral clustering to $G$ using $\hat{L}$.
-%   \STATE {\bfseries Output:} Subspace partitions $\mathcal{X}_1,...,\mathcal{X}_{\hat{L}}$
-%\end{algorithmic}
-%\end{algorithm}
 
 To handle noisy $X$, a natural extension is to relax the equality constraint in \eqref{eq:SSC} and solve the following unconstrained minimization problem instead \cite{elhamifar2012ssc_journal}:
 \begin{equation}\label{eq:Lasso}
@@ -290,6 +318,8 @@ Our objective here is to provide sufficient conditions upon which the LASSO subs
 
 
 \section{主要结论}\label{sec:main}
+\subsection{初步聚类的正确性}
+
 \subsection{确定性模型}
 %We start by defining some key concepts.
 We start by defining two concepts adapted from the original proposal of \cite{soltanolkotabi2011geometric}.
@@ -639,6 +669,123 @@ Finally, we note that for the random noise model in Theorem~\ref{thm:thm_random_
 
 
 
+\section{初步聚类的正确性}\label{sec:proof_greedy}
+下面是 Levy 引理的特殊形式。
+\begin{lemma}[\cite{ledoux2005concentration}] \label{lem:measureconc}
+对 $x \sim \text{Unif}(\mathbb{S}^{d-1})$，我们有
+\begin{align*} 
+\Pr \{ \| A x \|_2  > m\|A x\|_2 + t \} &\le \exp \left( - \frac{dt^2}{2\|A\|_2^2} \right), \\
+\Pr \{ \| A x \|_2  < m\|A x\|_2 - t \} &\le \exp \left( - \frac{dt^2}{2\|A\|_2^2} \right).
+\end{align*}
+对任意 $A \in \R^{p \times d}, t > 0$ 成立。 其中$m\|Ax\|_2$ 是 $\|Ax\|_2$ 的中位数。
+\end{lemma}
+
+\begin{lemma} \label{lem:expectation}
+  对 $x \sim \text{Unif}(\mathbb{S}^{d-1})$ 和任意矩阵 
+  $A \in \mathbb{R}^{p \times d}$，我们有
+  $$ E[\|Ax\|_2^2] = \frac{1}{d} \|A\|_F^2 $$
+\end{lemma}
+
+\begin{proof}
+令 $A = U \Sigma V^T$ 为 $A$ 的奇异值分解，于是
+\begin{align*}
+  E[\|Ax\|_2^2] = E[\|U \Sigma V^T x\|_2^2] 
+  = E[\|\Sigma x\|_2^2] = \sum_{i=1}^{\min(p,d)} \sigma_i^2 E[x_i^2] 
+  = \sum_{i=1}^{\min(p,d)} \sigma_i^2 \cdot \frac{1}{d} = \frac{1}{d} \|A\|_F^2.
+\end{align*}
+其中$ E[x_i^2] = \frac{1}{d}$，是因为 $x$ 的每个分量对称，期望相同，而$ \sum_{i=1}^d E[x_i^2] = 1 $，
+\end{proof}
+
+\begin{lemma} \label{lem:subspace_concentration}
+  对 $x \sim \text{Unif}(\mathbb{S}^{d-1})$ 和任意矩阵 
+  $A \in \mathbb{R}^{p \times d}$，若 $\|A\|_2$ 有界，我们有
+  \begin{align*}
+    \Pr \left\{ \|A x\|_2 > \sqrt{\frac{1}{d}} \|A\|_F + 
+    \|A\|_2 \cdot \left( \sqrt{\frac{2\pi}{d}} + \delta \right) \right\}
+    \le e^{-\frac{d \delta^2}{2}},
+  \end{align*}
+  其中$\delta$ 为任意正实数。
+\end{lemma}
+
+\begin{proof}
+  由引理\ref{lem:measureconc}，我们有
+  \begin{align*}
+    \left| E\|A x\|_2 - m\|A x\|_2 \right| &\le E\left[ \left| \|A x\|_2 - m\|A x\|_2 \right| \right] \le \int_0^\infty 2e^{-\frac{dt^2}{2\|A\|_2^2}} dt = \sqrt{\frac{2\pi}{d}} \|A\|_2.
+  \end{align*}
+  于是
+  \begin{align*}
+    \Pr \left\{ \|A x\|_2 > \sqrt{\frac{\|A\|_F^2}{d}} + \sqrt{\frac{2\pi}{d}} \|A\|_2 + t \right\}
+    &= \Pr \left\{ \|A x\|_2 > \sqrt{E\|A x\|_2^2} + \sqrt{\frac{2\pi}{d}} \|A\|_2 + t \right\} \\
+    &\le \Pr \left\{ \|A x\|_2 > E\|A x\|_2 + \sqrt{\frac{2\pi}{d}} \|A\|_2 + t \right\} \\
+    &\le \Pr \left\{ \|A x\|_2 > m\|A x\|_2 + t \right\} \\
+    &\le \exp \left( -\frac{dt^2}{2 \|A\|_2^2} \right).
+  \end{align*}
+  其中由Jensen 不等式 $ E\|A x\|_2 \le \sqrt{E\|Ax\|_2^2}$，
+  由引理\ref{lem:subspace_concentration} $E \|Ax\|_2^2=\frac{\|A\|_F^2}{d}$。
+  另$\delta = \frac{t}{\|A\|_2}$ 即得证。
+\end{proof}
+
+为了控制当前点与
+\begin{lemma}[\cite{ball1997intro_convex_geometry}]\label{lem:spherical_cap}
+  对 $x \sim \text{Unif}(\S^{d-1})$ 和任意固定的向量 $a$，我们有
+  \begin{align*}
+    \left( \frac{1-\varepsilon}{2} \right)^{\frac{d-1}{2}} \ge
+    \Pr\left(|a^Tx|>\epsilon \|a\|_2\right) \leq 2e^{\frac{-d\epsilon^2}{2}}
+  \end{align*}
+\end{lemma}
+
+\begin{lemma} \label{lem:projbound_upper}
+  设 $x_1, \ldots, x_n $ 为采样于$\text{Unif}(\S^{d-1})$ 的独立同分布随机向量，
+  令 $z$ 为 $\{ |a^T x_i|, 1 \le i \le n\}$
+  中的最大值，其中$a \in \R^d $ 是固定向量，则
+  \begin{align*}
+    \Pr{z>\sqrt{\frac{2}{d} \log \frac{2n}{\delta}} \|a\|_2} \le \delta,
+  \end{align*}
+  其中$0<\delta<1$。
+\end{lemma}
+
+\begin{proof}
+  对任意$\varepsilon>0$，我们有
+  \begin{align*}
+    \Pr{z > \varepsilon \|a\|_2} &\le \Pr\left\{\exists i \in [n] : |a^T
+    x_i|>\varepsilon \|a\|_2 \right\} \\
+    &\le n \Pr\left\{ |a^T x_i|>\varepsilon \|a\|_2\right\} \\
+    &\le 2n e^{\frac{-d\varepsilon^2}{2}},
+  \end{align*}
+  其中第三个不等式用了引理\ref{lem:spherical_cap}。令$\delta=2n
+  e^{\frac{-d\varepsilon^2}{2}}$即得证。
+\end{proof}
+
+\begin{lemma} \label{lem:projbound_lower}
+  设 $x_1, \ldots, x_n $ 为采样于$\text{Unif}(\S^{d-1})$ 的独立同分布随机向量，
+  令 $z_m$ 为 $\{ |a^T x_i|, 1 \le i \le n\}$ 中的第m大值，其中$a \in \R^d $ 是固定向量，则
+  \begin{align*}
+    \Pr\left\{z>\left( 1-2\left(\frac{m\log \frac{ne}{m}-\log \delta}{n-m+1}
+    \right)^{\frac{2}{d-1}}\right) \|a\|_2\right\} \ge 1-\delta,
+  \end{align*}
+  其中$0<\delta<1$。
+\end{lemma}
+\begin{proof}
+  对任意$\varepsilon>0$，我们有
+  \begin{align*}
+    \Pr\{z_m \le \varepsilon \|a\|_2\} &= \Pr\left\{\exists I \subset [n], |I|=n-m+1:
+    z_i \le \varepsilon, \forall i \in I\right\} \\
+    &\le \binom{n}{m-1} \cdot \Pr \left\{ z_1 \le \varepsilon \right\}^{n-m+1}\\
+    &\le \left( \frac{ne}{m} \right)^m \cdot \left( 1-\left(
+    \frac{1-\varepsilon}{2} \right)^{\frac{d-1}{2}} \right)^{n-m+1} \\
+    &\le \exp \left\{ m \log \frac{ne}{m}-\left(
+    \frac{1-\varepsilon}{2}\right)^{\frac{d-1}{2}} (n+m-1) \right\},
+  \end{align*}
+  其中我们用了引理\ref{lem:spherical_cap}， $\binom{n}{m}\le
+  (\frac{ne}{m})^m$ 和 $1+x\le e^x, \forall x$。
+  令
+  $$\delta= \exp \left\{ m \log \frac{ne}{m}-\left(
+    \frac{1-\varepsilon}{2}\right)^{\frac{d-1}{2}} (n+m-1)
+  \right\}$$
+  再取互补事件即可得证。
+\end{proof}
+
+对于
 \section{确定情形下的证明}\label{sec:proof_deterministic}
 
 %,\ref{thm:thm_random_noise},\ref{thm:semirandom}~and~\ref{thm:fullrandom}.
@@ -1070,6 +1217,7 @@ $$\eqref{eq:deterministic_delta}\Rightarrow A\delta^3+B\delta^2+C\delta+D<0 \Lef
 \Rightarrow \text{\eqref{eq:lambda_range} is not an empty set.}$$
 This completes the proof of Theorem~\ref{thm:thm_general}.
 
+\section{数值实验}\label{sec:experiments}
 \begin{thebibliography}{47}
     \providecommand{\natexlab}[1]{#1}
     \providecommand{\url}[1]{\texttt{#1}}
@@ -1223,6 +1371,11 @@ This completes the proof of Theorem~\ref{thm:thm_general}.
     \newblock Spectral clustering of linear subspaces for motion segmentation.
     \newblock In \emph{Computer Vision, 2009 IEEE 12th International Conference
     on}, pages 678--685. IEEE, 2009.
+
+    \bibitem[Ledoux(2005)]{ledoux2005concentration}
+    M.~Ledoux.
+    \newblock \emph{The concentration of measure phenomenon}, volume~89.
+    \newblock AMS Bookstore, 2005.
 
     \bibitem[Lee et~al.(2005)Lee, Ho, and Kriegman]{lee2005extendedyaleb}
     Kuang-Chih Lee, Jeffrey Ho, and David~J Kriegman.
