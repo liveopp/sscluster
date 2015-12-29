@@ -760,7 +760,7 @@ Finally, we note that for the random noise model in Theorem~\ref{thm:thm_random_
   设 $x_1, \ldots, x_n $ 为采样于$\text{Unif}(\S^{d-1})$ 的独立同分布随机向量，
   令 $z_m$ 为 $\{ |a^T x_i|, 1 \le i \le n\}$ 中的第m大值，其中$a \in \R^d $ 是固定向量，则
   \begin{align*}
-    \Pr\left\{z>\left( 1-2\left(\frac{m\log \frac{ne}{m}-\log \delta}{n-m+1}
+    \Pr\left\{z_m>\left( 1-2\left(\frac{m\log \frac{ne}{m}-\log \delta}{n-m+1}
     \right)^{\frac{2}{d-1}}\right) \|a\|_2\right\} \ge 1-\delta,
   \end{align*}
   其中$0<\delta<1$。
@@ -785,7 +785,9 @@ Finally, we note that for the random noise model in Theorem~\ref{thm:thm_random_
   再取互补事件即可得证。
 \end{proof}
 
-对于
+为了保证算法\ref{alg:nsn}的正确性，我们要求对每个点，它的$k$邻居点都和自身属于同一
+子空间。不是一般性，我们这就意味着
+$$ |x_1^T x_i|>|x_1^T x_j| \forall j \in {j:l_j \ne l_1 $$
 \section{确定情形下的证明}\label{sec:proof_deterministic}
 
 %,\ref{thm:thm_random_noise},\ref{thm:semirandom}~and~\ref{thm:fullrandom}.
