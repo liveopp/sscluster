@@ -670,6 +670,31 @@ Finally, we note that for the random noise model in Theorem~\ref{thm:thm_random_
 
 
 \section{初步聚类的正确性}\label{sec:proof_greedy}
+我们假设样本点满足\emph{半随机模型}，即每个子空间是确定的，
+但是采样点是在每个子空间中随机生成的。进一步地，
+不妨设采样点都是单位向量，这相当于它们都均匀采样于自身子空间的单位球上。
+简单起见，我们设每个子空间的唯独和点数相同，即$d_0\triangleq d_1=\cdots=d_L,
+n_0\triangleq = n_1=\cdots=n_L$，且不考虑噪音。
+
+令$D_i\in \R^{d\times d_0}, i\in [L]$为子空间$\S^{(i)}$的正交基组成的矩阵。两个
+子空间的\emph{相似度}定义为
+\begin{align*}
+  \aff(i,j) \triangleq \frac{\|D_i^\top D_j\|_F}{\sqrt{d_0}} =
+  \sqrt{\frac{\sum_{k=1}^{d} \cos^2 \theta^{i,j}_k}{d_0}} \in [0,1],
+\end{align*}
+其中 $\theta^{i,j}_k$ 是 $\D_i$ 和 $\D_j$之间的第$k$个主角。
+子空间 $\D_i$ 和 $\D_j$ 完全一样当且仅当 $\aff(i,j) = 1$。
+若 $\aff(i,j) = 0$，那么 $\D_i$ 中的任意向量垂直于 $\D_j$。
+我们定义最大相似度为
+$$ \max \aff \triangleq \max_{i,j \in [L], i \neq j} \aff(i,j) \in [0,1].$$
+
+因此根据以上假设有 $n = n_0 L$ 个点，每个点 $y_i$ 独立同分布地均匀采样于
+$\S^{d-1} \cap \set{D}_{l_i}$ ， $\S^{d-1}$ 是 $\mathbb{R}^d$ 中的单位球。于是
+\begin{align*}
+  y_i = D_{l_i} x_i ,\quad x_i \sim \text{Unif}(\mathbb{S}^{d_0-1}) ,\quad
+  \forall i \in [N].
+\end{align*}
+
 下面是 Levy 引理的特殊形式。
 \begin{lemma}[\cite{ledoux2005concentration}] \label{lem:measureconc}
 对 $x \sim \text{Unif}(\mathbb{S}^{d-1})$，我们有
@@ -785,9 +810,59 @@ Finally, we note that for the random noise model in Theorem~\ref{thm:thm_random_
   再取互补事件即可得证。
 \end{proof}
 
-为了保证算法\ref{alg:nsn}的正确性，我们要求对每个点，它的$k$邻居点都和自身属于同一
-子空间。不是一般性，我们这就意味着
-$$ |x_1^T x_i|>|x_1^T x_j| \forall j \in {j:l_j \ne l_1 $$
+为了保证算法\ref{alg:nsn}的正确性，我们要求对每个点，其$k$个邻居都与自身属于同一
+子空间。不失一般性地，我们考虑$x_1$ ，上面的条件意味着
+$$ |x_1^T x_i|>|x_1^T x_j| \forall j \in \{j:l_j \ne l_1\}, $$
+其中 $x_i$ 为$l_1$类中在$x_1$上投影第$k$大的点。
+\begin{theorem} \label{thm:nsn}
+  对于上面的半随机模型，若存在$\delta_1, \delta_2, \delta_3 >0$ 使得
+  $$\max \aff \le \frac{1-2\left( \frac{k\log \frac{(n-1)e}{k}-\log \delta_1}
+  {n-k} \right)^{\frac{2}{d-1}}}{\left( 1+\sqrt{2\pi}+\sqrt{d_0}\delta_3\right)\delta_2}, $$
+  则每个点与其$k$个投影最近邻都属于同一子空间的概率不小于$(1-\delta_1)(1-2\exp(\frac{-d_0
+  \delta_2^2}{2}))(1-\exp(\frac{-d_0 \delta_3^2}{2}))$。
+\end{theorem}
+\begin{proof}
+不失一般性地，我们考虑$x_1$ ，要满足的条件为
+\begin{align}
+  |y_1^T y_i|>|y_1^T y_j| \forall j \in \{j:l_j \ne l_1\},
+  \label{eq:cond}
+\end{align}
+其中 $y_i$ 为$l_1$类中在$y_1$上投影第$k$大的点。由于
+\begin{align*}
+  |y_1^1 y_i|=
+  \begin{cases}
+    |x_1^T x_i| & l_i = l_1 \\
+    |x_1^T D_1^T D_{l_i}x_i| & l_i \ne l_1
+  \end{cases}
+\end{align*}
+所以(\ref{eq:cond})的左边就是$n-1$个$\S^{d_0-1}$上的均匀采样点在
+$x_1$上投影的第$k$大值$z_k$，根据引理\ref{lem:projbound_lower}，有不小于$1-\delta_1$
+的概率
+\begin{align}
+  z_k>\left( 1-2\left(\frac{k\log \frac{(n-1)e}{k}-\log \delta_1}{n-k}
+    \right)^{\frac{2}{d_0-1}}\right)
+  \label{eq:left}
+\end{align}
+成立。而根据引理\ref{lem:spherical_cap}
+\begin{align} \label{eq:right1}
+  |x_1^T D_1^T D_{l_i}x_i| \le \delta_2 \|D_j^T D_1 x_1\|_2
+\end{align}
+成立的概率不小于$1-\exp(\frac{d_0 \delta_2^2}{2})$。
+进一步地，根据引理\ref{lem:subspace_concentration}，有不小于$1-\exp(\frac{-d\delta_3^2}{2})$
+的概率有
+\begin{align}
+  \|D_j^T D_1 x_1\|_2 &\le \frac{1}{\sqrt{d_0}} \|D_j^TD_1\|_F +
+  \|D_j^T D_1\|_2 \left( \sqrt{\frac{2\pi}{d_0}}+\delta_3 \right) \nonumber\\
+  &\le \|D_j^TD_1\|_F \left(\frac{1+\sqrt{2\pi}}{\sqrt{d_0}}+\delta_3
+  \right) \nonumber \\
+  &\le \sqrt{d_0} \max \aff \left(\frac{1+\sqrt{2\pi}}{\sqrt{d_0}}+\delta_3
+  \right).
+  \label{eq:right2}
+\end{align}
+结合(\ref{eq:left})，(\ref{eq:right1})和(\ref{eq:right2})，即得证。
+
+\end{proof}
+
 \section{确定情形下的证明}\label{sec:proof_deterministic}
 
 %,\ref{thm:thm_random_noise},\ref{thm:semirandom}~and~\ref{thm:fullrandom}.
