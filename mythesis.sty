@@ -1,19 +1,38 @@
+\ProvidesPackage{mythesis}
+
+\textwidth  = 16cm
+\textheight = 24cm
+\topmargin  = -6mm
+\oddsidemargin  = 30pt
+\evensidemargin = 30pt
+\baselineskip = 20mm
+\renewcommand{\baselinestretch}{1.5}
+
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{graphicx,subcaption}
+\usepackage{algorithm,algpseudocode}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                   PROOF, THEOREM, and FRIENDS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %\newcommand{\BlackBox}{\rule{1.5ex}{1.5ex}}  % end of proof
 %\newenvironment{proof}{\par\noindent{\bf Proof\ }}{\hfill\BlackBox\\[2mm]}
-\newtheorem{example}{例} 
-\newtheorem{theorem}{定理}
-\newtheorem{lemma}[theorem]{引理} 
+\newtheorem{example}{例}[section]
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}[section]{引理}
 \newtheorem{proposition}[theorem]{Proposition} 
 \newtheorem{remark}[theorem]{Remark}
 \newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{definition}[theorem]{定义}
-\newtheorem{conjecture}[theorem]{Conjecture}
-\newtheorem{axiom}[theorem]{Axiom}
+\theoremstyle{definition}
+\newtheorem{prob} {\indent 问题}[section]
+\newtheorem{definition} {定义}[section]
+\newtheorem{rem}  {\indent 注}  [section]
 
+%\newpagestyle{main}[\small]{
+%\sethead{\kaishu\chaptername\quad\chaptertitle}{}{\kaishu\sectionname\quad\sectiontitle}
+%\setfoot{}{\thepage}{}
+%\headrule
+%}
 \DeclareMathOperator*{\argmin}{argmin}
 % Definitions of handy macros
 \def\E{\mathbb{E}}
