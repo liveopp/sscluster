@@ -1,44 +1,51 @@
 \documentclass[main]{subfiles}
+
+\newlength{\Han}
+\settowidth{\Han}{汉}
+\newcommand{\spreadCJK}[2]{\makebox[#1\Han][s]{#2}}
+
 \begin{document}
 % 封一
-\pagestyle{empty}
-
-\begin{flushright}
-  {\zihao{-5}  学校代码：10246{\ \ \ \ \ \ \ \ \ \ \ }\\
-  学{\hspace{18pt}}号：13110180026}
-\end{flushright}
-\vspace{4mm}
-
-\begin{center}
-%\includegraphics[width=0.6\textwidth]{pic/FudanLogo.eps}
-\end{center}
-\vspace{4mm}
-
-\begin{center}
-  {\zihao{2} 硕\quad 士\quad 学\quad 位\quad 论\quad 文}\\
-\vspace{2.5cm}
-{\zihao{2} \textbf{基于Group LASSO的稀疏子空间聚类}}\\
-\vspace{1cm}
-%{\Large empty}
-\end{center}
-\vspace{2cm}
-
-\begin{center}
-  {\zihao{4}
-  院{\hspace{39pt}}系： \underline{\qquad 数\ 学\ 科\ 学\ 学\ 院 \qquad }\\
+\begin{titlepage}
+  \begin{flushright}
+    \parbox[c]{7em}{ %
+    {\footnotesize \makebox[\width][c]{学校代码:\quad10246 }\par
+    \makebox[\width][c]{学\phantom{占位}号:\quad13110180026}}}
+%    {\zihao{-5}  学校代码：10246{\ \ \ \ \ \ \ \ \ \ \ }\\
+%    学{\hspace{18pt}}号：13110180026}
+  \end{flushright}
   \vspace{4mm}
-  专{\hspace{39pt}}业： \underline{\qquad\quad 计\ 算\ 数\ 学 \qquad\qquad }\\
+
+  \centering
+  \includegraphics[width=0.5\textwidth]{pics/FudanLogo}
+
   \vspace{4mm}
-  姓{\hspace{39pt}}名： \underline{\qquad\qquad 张\qquad 航\qquad\qquad }\\
-  \vspace{4mm}
-  指\ 导\ 教\ 师： \underline{\qquad 张\ 淑\ 芹\ \ 副 \ 教\ 授 \qquad\ }\\
-  \vspace{4mm}
-  完\ 成\ 日\ 期： \underline{\qquad\quad 2016\ 年\ 03\ 月 \quad\qquad\ }}
-\end{center}
+
+  \begin{center}
+    {\Huge \makebox [0.45\textwidth][s]{硕士学位论文}\par}
+    \vspace{2.5cm}
+    {\LARGE \textsf{基于Group LASSO的稀疏子空间聚类}\par}
+    \vspace{1cm}
+    {\Large \textrm{Sparse Subspace Clustering based on Group LASSO }\par}
+    \vspace{2cm}
+
+    {\large
+      \spreadCJK{6}{院系}: \underline{\qquad\ \ 数\ 学\ 科\ 学\ 学\ 院 \qquad }\par
+      \vspace{4mm}
+      \spreadCJK{6}{专业}: \underline{\qquad\qquad 计\ 算\ 数\ 学\ \ \qquad\quad}\par
+      \vspace{4mm}
+      \spreadCJK{6}{姓名}: \underline{\qquad\qquad\ \ 张\quad 航\qquad\qquad\quad}\par
+      \vspace{4mm}
+      \spreadCJK{6}{指导老师}: \underline{\qquad 张\ 淑\ 芹\ \ 副 \ 教\ 授
+      \qquad\ }\par
+      \vspace{4mm}
+      \spreadCJK{6}{完成日期}: \underline{\qquad\quad 2016\ 年\ 03\ 月 \quad\qquad\ }
+    }
+  \end{center}
 
 
 % 扉页
-\newpage
+%\newpage
 %\thispagestyle{empty}
 %
 %\begin{center}
@@ -54,4 +61,5 @@
 %  {陆\ 帅\ \ \ 副\ 研\ 究\ 员}}
 %\end{center}
 
+\end{titlepage}
 \end{document}

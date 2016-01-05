@@ -1,4 +1,17 @@
 \documentclass[main.tex]{subfiles}
 \begin{document}
-\chapter{数值实验}\label{chp:experiments}
+\chapte{数值实验}\label{chp:experiments}
+
+To demonstrate the practical implications of our robustness guarantees for LASSO-SSC, we conduct four numerical experiments including three with synthetic generated data and one with real data. For fast computation, we use ADMM implementation of LASSO solver
+  with default numerical parameters. Its complexity is proportional to the problem size and the convergence guarantee \cite{boyd2011admm}. We also implement a simple ADMM solver for the matrix version SSC
+\begin{equation}\label{eq:MatrixLasso}
+\begin{aligned}
+\min_{C} \; \|C\|_1+\frac{\lambda}{2}\|X-XC\|_F^2 \quad
+\text{s.t.} \;\quad\mathrm{diag}(C)=0,
+\end{aligned}
+\end{equation}
+which is consistently faster than the column-by-column LASSO version. This algorithm is first described in \cite{elhamifar2012ssc_journal}. To be self-contained, we   provide the pseudocode and some numerical simulation in the appendix.
+\section{ADMM 算法}
 \end{document}
+
+
