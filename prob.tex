@@ -1,39 +1,43 @@
 \documentclass[main]{subfiles}
 \begin{document}
-\chapter{问题及算法叙述}\label{chp:prob_setup}
-\section{问题}
-\paragraph{记号: }
-我们记无噪音的数据矩阵为 $Y \in \mathbb{R}^{d\times n}$,  $Y$ 的每一列都属于$L$
-个子空间的交
-$$\mathcal{S}_1 \cup \mathcal{S}_2 \cup...\cup \mathcal{S}_L.$$
-并且都是单位向量
-\footnote{单位化的条件能使后面的证明叙述简洁，不过我们的结论能拓展到一般的情形只需要对后面给出的条件稍作修改。}。
+\chapter{问题及算法}\label{chp:prob_setup}
+本章我们具体地介绍受SSC启发的新算法。
 
-每个子空间 $\mathcal{S}_{\ell}$ 的维度是 $d_{\ell} \le d$ 并且有 $n_{\ell}$
-个采样点，满足$n_1 +n_2+...+n_L=n$. 我们观察到的带噪音的数据矩阵为 $X = Y+Z$,
-其中 $Z$ 是噪音矩阵. 令 $Y^{(\ell)}\in \mathbb{R}^{d\times n_{\ell}}$ 表示 
-$Y$ 中属于 $\mathcal{S}_{\ell}$ 的列组成的矩阵，相应的我们可以定义 $X^{(\ell)}$ 和 $Z^{(\ell)}$.
-不失一般性地，令$X=[X^{(1)},X^{(2)},...,X^{(L)}]$ ，即采样点按照子空间聚在一起.
-花体字母 $\mathcal{X},\mathcal{Y_{\ell}}$ 表示对应矩阵（即 $X$ 和 $Y^{(\ell)}$）的所有列向量组成的集合。
+虽然SSC是目前最优秀的子空间聚类算法之一，但是它有两个缺陷：第一，SSC将每个点用其他点表示，
+这个过程点与点是互相独立的，因此没有考虑优化表达系数之间的一致性。如果我们将数据点看作
+“字典”，那么理应有些“词”比较出众，同一类的点都应该尽量用相同的几个点表示。这样
+很可能使之后的邻接图聚类更准确，因为同一类的点都与相同的几个点相连。第二，SSC
+期望得到稀疏表示，然而对于之后的谱聚类算法，邻接矩阵反而不能太稀疏。如果每个点都与
+较多的同类点相连，这样聚类的效果很可能更好。
 
-对任一矩阵 $X$, $\mathcal{P}(X)$ 表示其所有列向量张成的对称凸包，即
-$\mathcal{P}(X) = \mathrm{conv}(\pm \mathcal{X})$。简记
-$\mathcal{P}_{I^c}^{(\ell)} := \mathcal{P}(X_{I^c}^{(\ell)}), \mathcal{Q}_{I^c}^{(\ell)} :=
-\mathcal{P}(Y_{I^c}^{(\ell)})$。$\mathbb{P}_{\mathcal{S}}$ 和
-$\mathrm{Proj}_{\mathcal{S}}$ 表示子空间 $\mathcal{S}$
-的投影矩阵和投影算子。我们使用$X_i$ 表示矩阵$X$ 的第$i$列，$X_i^T$ 表示矩阵转置后的第$i$列, $X_I$
-表示将$X$矩阵的列按照指标集$I$取出后组成的子矩阵.
-同理$X^T_I$是转置后的子矩阵。定义$\|X\|_{2, 1}:= \sum_i \|X_i\|_2$ ,
-$\norm(X)$是将$X$的每一列归一化（$X_i \neq \mathbf{0}$），$\langle X, Y \rangle
-:= \tr(X^T Y)$。
+基于上面的考虑，我们提出了基于 Multitasking 和Group
+LASSO的稀疏子空间聚类。首先，我们考虑将数据点聚成许多小类，使得每个小类的点
+都属于同一子空间。事实上，在很多实际应用中，空间距离相近的点很可能属于同一类，
+比如在运动分割中，无论摄像头、物体如何运动，同一个刚体上相近的几个点，在每一
+帧上的位置都会很近，因此在高维空间中依然相近。于是利用贪心的K近邻方法，可以
+将数据点初步聚类。如果将同一小类的点组成矩阵，我们得到$X_1, X_2, \cdots X_m$。
+对$i\in [m]$，考虑下面的优化问题
+\begin{align}
+  \min_C \|C^T\|_{2,1} + \frac{\lambda}{2} \|X_i - X_{-i}C_i\|_F^2
+  \label{wq:multi}
+\end{align}
+其中$X_{-i}$为$X_i$之外的所有数据点组成的矩阵，$\|C\|_{2, 1}:= \sum_i
+\|C_i\|_2$。利用所有的$C_i$和初步聚类结果，构造邻接矩阵，最后再进行谱聚类。
+
+另一方面，将每一类的下表集合记为$\Omega$，如果把SSC的$l_1$范数换成 group $l_1$
+范数，我们得到如下优化问题
+\begin{align}
+  \min_C \|c\|_{\Omega} + \frac{\lambda}{2}\|x_i - X_{-i} c_i\|_2^2
+  \label{eq:group}
+\end{align}
+其中$\|c\|_{\Omega}:= \sum_{I\in \Omega}\|c_{I}\|_2$。
+这相当于要求每个点都用尽量少的小类表示。
 
 \section{初步聚类}
-我们第一步是将数据点分成若干组，使得每一组里的点属于同一个子空间。为了做到这点
-必须利用数据的空间性质。事实上，当采样点充分且子空间之间分离性较好时，一个数据点的邻居很可能
-与它是同一类。这种性质在很多实际应用中天然满足，比如运用分割中，位置比较接近的点很可能来自
-同一个物体。
 
-然而如果只考虑数据点的邻居，这无疑忽略了线性空间的性质，于是我们定义一个新的点到点集距离：
+第一步要将数据点分成若干组，使得每一组里的点属于同个子空间。为了做到这点
+必须利用数据的空间性质，然而如果只考虑数据点的邻居，无疑忽略了线性空间的性质，
+于是我们定义一个新的点到点集距离：
 \begin{definition}[点到空间距离]\label{def:space_distance}
   设$x\in \R^d, X\in \R^{d\times n}$，$k$为给定正整数，我们有距离函数
   $$ d(x, X, k) = \begin{cases} \|x -\cP_{U_{1:k}} x\|_2 & \text{非仿射空间}\\
@@ -80,6 +84,31 @@ stored in the form of a matrix $U \in \mathbb{R}^{p \times
   computational cost, this can be reduced to $O(KpN^2)$, and the faster
   which solve a convex program with $N^2$ variables and $pN$ constraints.
 
+\paragraph{记号: }
+我们记无噪音的数据矩阵为 $Y \in \mathbb{R}^{d\times n}$,  $Y$ 的每一列都属于$L$
+个子空间的交
+$$\mathcal{S}_1 \cup \mathcal{S}_2 \cup...\cup \mathcal{S}_L.$$
+并且都是单位向量
+\footnote{单位化的条件能使后面的证明叙述简洁，不过我们的结论能拓展到一般的情形只需要对后面给出的条件稍作修改。}。
+
+每个子空间 $\mathcal{S}_{\ell}$ 的维度是 $d_{\ell} \le d$ 并且有 $n_{\ell}$
+个采样点，满足$n_1 +n_2+...+n_L=n$. 我们观察到的带噪音的数据矩阵为 $X = Y+Z$,
+其中 $Z$ 是噪音矩阵. 令 $Y^{(\ell)}\in \mathbb{R}^{d\times n_{\ell}}$ 表示 
+$Y$ 中属于 $\mathcal{S}_{\ell}$ 的列组成的矩阵，相应的我们可以定义 $X^{(\ell)}$ 和 $Z^{(\ell)}$.
+不失一般性地，令$X=[X^{(1)},X^{(2)},...,X^{(L)}]$ ，即采样点按照子空间聚在一起.
+花体字母 $\mathcal{X},\mathcal{Y_{\ell}}$ 表示对应矩阵（即 $X$ 和 $Y^{(\ell)}$）的所有列向量组成的集合。
+
+对任一矩阵 $X$, $\mathcal{P}(X)$ 表示其所有列向量张成的对称凸包，即
+$\mathcal{P}(X) = \mathrm{conv}(\pm \mathcal{X})$。简记
+$\mathcal{P}_{I^c}^{(\ell)} := \mathcal{P}(X_{I^c}^{(\ell)}), \mathcal{Q}_{I^c}^{(\ell)} :=
+\mathcal{P}(Y_{I^c}^{(\ell)})$。$\mathbb{P}_{\mathcal{S}}$ 和
+$\mathrm{Proj}_{\mathcal{S}}$ 表示子空间 $\mathcal{S}$
+的投影矩阵和投影算子。我们使用$X_i$ 表示矩阵$X$ 的第$i$列，$X_i^T$ 表示矩阵转置后的第$i$列, $X_I$
+表示将$X$矩阵的列按照指标集$I$取出后组成的子矩阵.
+同理$X^T_I$是转置后的子矩阵。定义$\|X\|_{2, 1}:= \sum_i \|X_i\|_2$ ,
+$\norm(X)$是将$X$的每一列归一化（$X_i \neq \mathbf{0}$），$\langle X, Y \rangle
+:= \tr(X^T Y)$。
+
 \section{Group LASSO 和 Multitasking}
 原有的 SSC 方法，主要求解下面的优化问题
 \begin{equation}\label{eq:SSC}
@@ -114,9 +143,6 @@ Note that the LASSO Subspace Detection Property is a strong condition. In practi
   \includegraphics[width=0.35\linewidth]{pics/ViolateSEP.png}\\
   \caption{Illustration of LASSO-Subspace Detection Property/Self-Expressiveness Property. \textbf{Left:} SEP holds. \textbf{Right:} SEP is violated even though spectral clustering is likely to cluster this affinity graph perfectly into 5 blocks.}\label{fig:SEP}
 \end{figure}
-
-\paragraph{Models of analysis: }
-Our objective here is to provide sufficient conditions upon which the LASSO subspace detection properties hold in the following four models. Precise definition of the noise models will be given in Section~\ref{sec:main}.
 
 \begin{tabular}{ll}
   $\bullet$ fully deterministic model;\\
