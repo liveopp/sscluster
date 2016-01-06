@@ -7,205 +7,26 @@
 
 \subfile{front}
 
+\frontmatter
 % 目录
 \tableofcontents
 
-% 简介
+\mainmatter
+\subfile{abstr}
+
 \subfile{intro}
 
-%\subfile{prob}
-\section{主要结论}\label{sec:main}
-\subsection{Randomized models}
-We  further analyze three randomized models with increasing level of randomness.
-\begin{description}
-  \item[$\bullet$ Determinitic+Random Noise.] Subspaces and samples in subspace are arbitrary; the noise obeys the Random Noise model (Definition~\ref{def:Random_noise_model}).
-  \item[$\bullet$ Semi-random+Random Noise.] Subspace is deterministic, but samples in each subspace are drawn iid uniformly from the intersection of the unit sphere and the subspace; the noise obeys the Random Noise model.
-  \item[$\bullet$ Fully random.] Both subspace and samples are drawn uniformly at random from their respective domains; the noise is iid Gaussian.%\footnote{It is straightforward to state the model for Definition~\ref{def:Random_noise_model}. We choose Gaussian as an illustration.}.
-\end{description}
-
-\begin{definition}[Random noise model]\label{def:Random_noise_model}
-Our random noise model is defined to be any additive $Z$ that is (1) columnwise iid; (2) spherical symmetric;  and (3) $\|z_i\|\leq \delta$ for all $i=1,...,N$ with probability at least $1-1/N$.
-\end{definition}
-%\begin{example}[Gaussian noise]
-$$\P\left(\delta:=\max_i\|z_i\| > \sqrt{1+\frac{6\log N}{n}}\sigma\right) \leq C/N^2.$$
-%\end{example}
-
-\begin{theorem}[Deterministic+Random Noise]\label{thm:thm_random_noise}
- Under random noise model, compactly denote $r_{\ell}$, $r$ and $\mu_{\ell}$ as in Theorem~\ref{thm:thm_general}, furthermore let
-$$\epsilon := \sqrt{\frac{6\log N}{n-\max_{\ell}{d_{\ell}}}}\leq \sqrt{\frac{C\log(N)}{n}}.$$
- %$$\epsilon := \sqrt{\frac{6\log N+2\log \max_{\ell}{d_{\ell}}}{n-\max_{\ell}{d_{\ell}}}}\leq \sqrt{\frac{C\log(N)}{n}} .$$
- If $\mu_{\ell}<r_{\ell}$ for all $\ell = 1,...,k$,
- \begin{align*}
- \epsilon\delta<\min_{\ell=1,...,L}\frac{r_{\ell}-\mu_{\ell}}{2\sqrt{d_{\ell}}+2}, &&\text{and}&& \epsilon\delta(1+\delta) < \min_{\ell=1,...,L}\frac{r(r_\ell-\mu_\ell)}{4r_\ell+6},
-\end{align*}
- %$$\delta<\min_{\ell=1,...,L}\frac{r_{\ell}-\mu_{\ell}}{2r_{\ell}+4},$$
-then with probability at least $1-9/N$, LASSO subspace detection property holds for all weighting parameter $\lambda$ in the range
-\begin{equation}\label{eq:thm_rand_noise_lambda_range}
-\frac{1}{r- 2\epsilon \delta-\epsilon\delta^2}<
-        \lambda<\min_{\ell=1,...,L}\left\{\frac{r_{\ell}-\mu_{\ell}-\delta\epsilon - \delta \sqrt{d_{\ell}} \epsilon}{\epsilon\delta(1+\delta)(3+r_{\ell}-\delta\sqrt{d_{\ell}}\epsilon)}\right\}
-%\frac{1}{(r-\delta\epsilon)(1-2\delta) - 2\delta-\delta^2}<
-%        \lambda<\min_{\ell=1,...,L}\left\{\frac{r_{\ell}-\mu_{\ell}-2\delta\epsilon}{\epsilon\delta(1+\delta)(2+r_{\ell}-\delta\epsilon)}\right\}
-\end{equation}
-which is guaranteed to be non-empty.
-\end{theorem}
-\paragraph{Low SnR paradigm.} Compared to Theorem~\ref{thm:thm_general}, Theorem~\ref{thm:thm_random_noise} considers a more benign noise which leads to a stronger result. In particular, without assuming any statistical model on how data are generated, we show that Lasso-SSC is able to tolerate noise of level $O\left((\frac{n}{\log N})^{1/4}(r(r_\ell-\mu_\ell))^{1/2}\right)$ or $O\left((\frac{n}{d\log N})^{1/2}(r_\ell-\mu_\ell)\right)$ (whichever is smaller). This extends SSC's guarantee with deterministic data to cases where the noise can be significantly larger than the signal. In fact, the SnR can go to $0$ as the ambient dimension gets large.
-
-On the other hand, Theorem~\ref{thm:thm_random_noise} shows that Lasso-SSC is able to tolerate a constant level of noise when the geometric gap $r_\ell-\mu_\ell$ is as small as $O(\sqrt{d/n})$. This is arguably near-optimal (when $d$ is small) as the projection of a constant-level random noise into a $d$-dimensional subspace has an expected magnitude of the same order, which could easily close up the small geometric gap for some non-trivial probability if the noise is much larger.
-
-%We note that the projection of the random noise into the subspace ($\delta_1$) has the magnitude of the same order $O(\sqrt{d/n})$. {\color{red}[Not sure what the last sentence means.]} % I was intending to argue that this is big enough to distort everything in the subspace almost arbitrarily.
-
-
-\paragraph{Margin of error.}
-Since the bound depends critically on $(r_\ell-\mu_\ell)$~--~the difference of inradius and incoherence~--~which is the geometric gap that appears in the noiseless guarantee of \cite{soltanolkotabi2011geometric}. We will henceforth call this gap the \emph{margin of error}.
-
-We now analyze this margin of error under different generative models. We
-start from the semi-random model, where the distance between two subspaces is measured as follows.
-\begin{definition}\label{def:subspace_affinity}
-The {\em affinity} between two subspaces is defined by:
-$$ \mathrm{aff}(\mathcal{S}_k,\mathcal{S}_{\ell}) = \sqrt{\cos^2{\theta^{(1)}_{k\ell }}+...+\cos^2{\theta^{(\min(d_k,d_{\ell}))}_{k\ell}}},$$
-where $\theta_{k\ell}^{(i)}$ is the $i^{th}$ canonical angle between the two subspaces. Let $U_{k}$ and $U_{\ell}$ be a set of orthonormal bases of each subspace, then $\mathrm{aff}(\mathcal{S}_k,\mathcal{S}_{\ell})=\|U_{k}^TU_{\ell}\|_F$.
-\end{definition}
-When data points are randomly sampled from each subspace, the geometric entity $\mu(\mathcal{X}_{\ell})$ can be expressed using this (more intuitive) subspace affinity, which leads to the following theorem.
-
-
-\begin{theorem}[Semi-random model+random noise]\label{thm:semirandom}
-Under the semi-random model with random noise, there exists a non-empty range of $\lambda$ such that LASSO subspace detection property holds with probability $1- \frac{9}{N} - \frac{1}{L^2}\sum_{\ell\neq \ell^\prime}\frac{1}{(N_{\ell}+1)N_{\ell^\prime}} e^{-\frac{t}{4}} -6\sum_{\ell=1}^L (e^{\gamma_1 (n-d_\ell)}+e^{\gamma_2 d_\ell}+e^{-\sqrt{N_{\ell}d_{\ell}}})$ as long as the noise level obeys
-\begin{align*}
- \delta(1+\delta) \leq& \max_{\ell,\ell'}\sqrt{\frac{n-d}{6\log N}} \frac{\sqrt{\log \kappa}}{40K_2\sqrt{dd_\ell}}\left(1- \frac{K_1K_2 \mathrm{aff}(\mathcal{S}_{\ell},\mathcal{S}_{\ell^\prime})}{\sqrt{ d_{\ell^\prime}}} \right),
-\end{align*}
-where $K_1:= (t \log  [(N_{\ell}+1)N_{\ell^\prime}] + \log L)$, $K_2 := 4\sqrt{\frac{1}{\log\kappa_\ell}}$, $\kappa_\ell := N_{\ell}/d_{\ell}$, $\frac{\log\kappa}{d} :=\min_{\ell} \frac{\log\kappa_\ell}{d_\ell}$, and
-$\gamma_1,\gamma_2$ are absolute constants.
-\end{theorem}
-The proof is essentially substituting the incoherence and inradius parameters in Theorem~\ref{thm:thm_random_noise} with meaningful bounds, so Thereom~\ref{thm:semirandom} can be regarded as a corollary of Theorem~\ref{thm:thm_random_noise}.
-
-\paragraph{Overlapping subspaces.}
-Similar to the results in \cite{soltanolkotabi2011geometric}, Theorem~\ref{thm:semirandom} demonstrates that LASSO-SSC can handle overlapping subspaces with noisy samples. By Definition~\ref{def:subspace_affinity}, $\mathrm{aff}(\mathcal{S}_k,\mathcal{S}_{\ell})$ can be small even if $\mathcal{S}_k$ and $\mathcal{S}_{\ell}$ share a basis.
-
-\paragraph{Comparison to \cite{soltanolkotabi2013robust}.}
-In the high dimensional setting when $n\gg d$, our result is able to handle the low SnR regime when $\delta = \Theta(n^{1/4}/d^{1/2})$, while \cite{soltanolkotabi2013robust} needs $\delta$ to be bounded by a small constant.
-
-In the case when $d$ is a constant fraction of $n$, however, our bound is worse by a factor of $\sqrt{d}$. \cite{soltanolkotabi2013robust} is still able to handle a small constant noise while we needs $\delta < O(\frac{1}{\sqrt{d}})$. The suboptimal bound might be due to the fact that we are simply developing the theorem for the semirandom model as a corollary of Theorem~\ref{thm:thm_random_noise} and haven not fully exploit the structure of the semi-random model in the proof.
-
-%Lastly, our result does not invoke the Restricted Isometry Property (RIP) bound at any point of the analysis therefore does not have any restrictions on the subspace dimension.  %The point is made more explicitly in the fully random model in Theorem~\ref{thm:fullrandom2}.
-%In fact, if we are willing to assume $d>\log N$, we can apply the intermediate results in the proof of \cite{soltanolkotabi2013robust} to further improve the bound to handle $\delta = \Theta((n/d)^{1/4})$ (see appendix for details), this matches the best known results for noisy subspace clustering using TSC \cite{heckel2013robust}.
-
-
-We now turn to the fully random case.
-\begin{theorem}[Fully random model]\label{thm:fullrandom}
-Suppose there are $L$ subspaces each with dimension $d$, chosen independently and uniformly at random. For each subspace, $\kappa d+1$ points are chosen independently and uniformly from the unit sphere inside each subspace. Each measurement is corrupted by iid Gaussian noise $\sim N(0,\sigma^2/n)$. Furthermore, if
-\begin{align*}
-  d < \frac{c(\kappa)^2\log\kappa}{24\log N} n, &&\text{and} && \sigma(1+\sigma) < \frac{c(\kappa)^2\log \kappa  }{20}\frac{\sqrt{n} }{d},
-\end{align*}
-then with probability at least $1-\frac{10}{N}-Ne^{-\sqrt{\kappa}d}$, the LASSO subspace detection property holds for any $\lambda$ in the range
-\begin{equation}\label{eq:thm_rand_lambda_range}
-  \frac{C_1\sqrt{d}}{c(\kappa)\sqrt{\log \kappa}}<\lambda <  \frac{C_2c(\kappa)\sqrt{n\log\kappa}}{\sigma\sqrt{d\log N}},
-\end{equation}
-which is guaranteed to be non-empty. Here, $C_1,C_2$ are absolute constants.
-\end{theorem}
-The results under this simple model are very interpretable. It
- provides intuitive guideline in how robustness of Lasso-SSC change with respect to the various parameters of the data.
- One one hand, it is sensitive to the dimension of each subspace $d$, since the $\sigma \leq \tilde{\Theta}(\frac{n^{1/4}}{\sqrt{d}})$. This dependence on subspace dimension $d$ is not a critical limitation as most interesting applications indeed have very low subspace-dimension, as summarized in Table~\ref{tab:low_rank}.
-On the other hand, the dependence on the number of subspaces $L$ (in both $\log\kappa$ and $\log N$ since $N=L(\kappa d+1)$) is only logarithmic.  This suggests that SSC is robust even when there are many clusters, and $Ld\gg n$.
-
-% such as subspace dimension $d$ and number of subspaces $L$ in the simplistic setting.
-
-
-
-%
-%\begin{remark}[Trade-off between $d$ and the margin of error]\label{rmk:tradeoff_large_d}
-%Theorem~\ref{thm:fullrandom}  extends our results to the paradigm where the subspace dimension grows  linearly with the ambient dimension. Interestingly, it shows that the margin of error scales $\tilde{\Theta}(\sqrt{1/d})$, implying a relationship between $d$ and robustness to noise. Fortunately,  most interesting applications indeed have very low subspace-rank, as summarized in Table~\ref{tab:low_rank}.
-%\end{remark}
-
-
-
-\begin{table}
-  \centering
- \begin{tabular}{|p{0.6\linewidth}|c|}
-   \hline
-   % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
-   \textbf{Application} & \textbf{Cluster rank}\\
-   \hline
-   3D motion segmentation \cite{costeira1998motion_seg} & $\mathrm{rank}=4$ \\\hline
-   Face clustering (with shadow) \cite{basri2003lambertianface} & $\mathrm{rank}=9$ \\\hline
-   Diffuse photometric face \cite{zhou2007PhotometricFace}& $\mathrm{rank}=3$ \\\hline
-   Network topology discovery \cite{eriksson2011high_rankMC} & $\mathrm{rank}=2$ \\\hline
-   Hand writing digits \cite{hastie1998MNIST}&  $\mathrm{rank}=12$\\\hline
-   Social graph clustering \cite{xu2011graphclustering}& $\mathrm{rank}=1$ \\
-   \hline
- \end{tabular}
-  \caption{Rank of real subspace clustering problems}\label{tab:low_rank}
-\end{table}
-
-%\begin{remark}[Robustness in the many-cluster setting]\label{rmk:large_num_subspace}
-%Another interesting observation is that the margin of error scales logarithmically with respect to $L$, the number of clusters (in both $\log\kappa$ and $\log N$ since $N=L(\kappa d+1)$). This suggests that SSC is robust even if there are many clusters, and $Ld\gg n$.
-%\end{remark}
-
-
-
-%\noindent\textbf{The guarantee in Theorem~\ref{thm:thm_general}:}
-\subsection{Geometric interpretations}%  of Theorem~\ref{thm:thm_general}}
-A geometric illustration of the condition in Theorem~\ref{thm:thm_general} is given in Figure~\ref{fig:geom_interpretation} in comparison to the geometric separation condition in the noiseless case.
-
-\begin{figure}
-        \centering
-        \begin{subfigure}[t]{0.4\textwidth}
-          \centering
-              \includegraphics[width=\textwidth]{pics/NoiselessGuarantee.png}\\
-               \caption{Noiseless SSC}
-               \label{fig.noiseless_guarantee}
-        \end{subfigure}%
-        ~ %add desired spacing between images, e. g. ~, \quad, \qquad etc.
-          %(or a blank line to force the subfigure onto a new line)
-        \begin{subfigure}[t]{0.4\textwidth}
-              \centering
-              \includegraphics[width=\textwidth]{pics/NoisyGuarantee.png}\\
-              \caption{Noisy LASSO-SSC} \label{fig.noisy_guarantee}
-        \end{subfigure}
-   \caption{Geometric interpretation and comparison of the noiseless SSC (\textbf{Left}) and noisy LASSO-SSC (\textbf{Right}).
-   %On the \textbf{left}, Theorem~2.5 of \cite{soltanolkotabi2011geometric} suggests that the projection of external data points must fall inside the solid blue polygon, which is the intersection of halfspaces defined by dual directions (blue dots) that are tangent planes of the red inscribing sphere. On the \textbf{right}, the guarantee of Theorem~\ref{thm:thm_general} means that the whole red sphere of each external data points must fall inside the dashed red polygon, which is smaller than the blue polygon by a factor related to the noise level.
-   }
-   \label{fig:geom_interpretation}
-\end{figure}
-
-The left pane depicts the separation condition $\mu_\ell \leq r_\ell$ in Theorem~2.5 of \cite{soltanolkotabi2011geometric}. The blue polygon represents the the intersection of halfspaces defined with dual directions that are also the tangent to the red inscribing sphere. More precisely, this is $\left\{x\in \cS_\ell \middle| \big|\langle v_i^{\ell}, x\rangle\big| \leq r_\ell\right\}$. From our illustration of $\mu$ in Figure~\ref{fig:SubspaceIncoherence}, we can easily tell that $\mu_\ell\leq r_\ell$ if and only if the projection of external data points fall inside this solid blue polygon. We call this solid blue polygon the successful region.
-
-The right pane illustrates our guarantee of Theorem~\ref{thm:thm_general} under bounded deterministic noise. The successful condition requires that the whole red ball (analogous to uncertainty set in Robust Optimization \cite{ben1998robust,bertsimas2004price}) around each external data point to fall inside the dashed red polygon, which is smaller than the blue polygon by a factor related to the noise level and the inradius.
-
-The successful region is affected by the noise because the design matrix is also arbitrarily perturbed and the dual solution is no longer within each subspace $\cS_\ell$. Specifically, as will become clear in the proof, the key of showing SEP boils down to proving
-$
-\langle N_i^{(\ell)}, x_j\rangle < 1
-$
-for all pairs of $(N_i^{(\ell)}, x_j)$ where
-$$ N_i^{(\ell)}=\arg\max_{N} \langle N, x_i^{(\ell)}\rangle  -\frac{1}{2\lambda}\|N\|^2 \text{ s.t. }  \|N^TX_{I^c}^{(\ell)} \|_\infty \leq 1,$$
-and $x_j$ is any point from another subspace. In the noiseless case we can always take $N_i^{(\ell)}\in\cS_\ell$ and $\langle N_i^{(\ell)}, x_j\rangle \leq \frac{\mu_\ell}{r_\ell}$. For noisy data and Lasso-SSC, we can no longer do that. In fact, for any fixed $\lambda$, the dual solution will be uniquely determined by a projection of $\lambda x_i^{(\ell)}$ on to the feasible region $\|N^TX_{I^c}^{(\ell)} \|_\infty \leq 1$ (see the first pane of Figure~\ref{fig:SubspaceIncoherence}). The absolute value of the inner product $\langle N_i^{(\ell)}, x_j\rangle$ will depend on the magnitude of the dual solution, especially its component perpendicular to the current subspace. Indeed by carefully choosing the error, we can make $\mathbb{P}_{\cS_\ell^{\perp}}N$ very correlated with some external data point $x_j$.
-
-%This is why we need to shrink the size of the successful region to account for the worst case.
-
-To illustrate this further, we plot the shape of this feasible region in 3D (see Figure~\ref{fig.convex_hull_n_polar}(b)). From the feasible region alone, it seems that the magnitude of dual variable can potentially be quite large. Luckily, the quadratic penalty in the objective function allows us to exploit the optimality of the solution $N$ and bound the ``out-of-subspace'' component of $N$, which results in a much smaller region where the solution can potentially be (given in Figure~\ref{fig.convex_hull_n_polar}(c)). The region for the ``in-subspace'' component is also smaller as is shown in Figure~\ref{fig.ProjPolar}. A more detailed argument of this is given in Section~\ref{sec:dual_separation} of the proof.
-
-\begin{figure}
-  \centering
-%  % Requires \usepackage{graphicx}
-%  \includegraphics[width=0.6\linewidth]{pics/CandesDualDirection.png}\\
-%  \caption{An illustration of dual direction from \cite{soltanolkotabi2011geometric}.}\label{fig.candes_dual_direction}
-    \includegraphics[width=0.7\linewidth]{pics/conv_hull_n_polarset2.png}\\
-  \caption{Illustration of \textbf{(a)} the convex hull of noisy data points, \textbf{(b)} its polar set and \textbf{(c)} the intersection of polar set and $\|N_{\parallel}\|$ bound. The polar set (b) defines the feasible region of \eqref{eq:dual_fictitious2}. It is clear that $N_{\parallel}$ can take very large value in (b) if we only consider feasibility. By considering optimality, we know the optimal $N$ must be inside the region in (c).} \label{fig.convex_hull_n_polar}
-    \includegraphics[width=0.6\linewidth]{pics/Projected_polarset_cmp1.png}\\
-  \caption{The projection of the polar set (the green area) in comparison to the projection of the polar set with $\|N_{\parallel}\|$ bound (the blue polygon). It is clear that the latter is much smaller.}\label{fig.ProjPolar}
-\end{figure}
-
-Admittedly, the geometric interpretation under noise is slightly messier than the noiseless case, but it is clear that the largest deterministic noise Lasso-SSC can tolerate must be smaller than geometric gap $r_\ell-\mu_\ell$. Theorem~\ref{thm:thm_general} show that a sufficient condition is $\delta \leq O(r(r_\ell-\mu_\ell))$. It remains unclear whether this gap can be closed without additional assumptions.
-
-%\subsection{Geometric interpretation of Theorem~\ref{thm:thm_random_noise}}
-
-Finally, we note that for the random noise model in Theorem~\ref{thm:thm_random_noise}, the geometric interpretation is similar, except that the impact of the noise is weakened. Thanks to the randomness and the corresponding concentration of measure, we may bound the reduction of the successful region with a much smaller value comparing to the adversarial noise case.
-
-%Algebraically, this is made clear by the \emph{randomized dual separation condition} (see \eqref{eq:dual_sep_random} in Lemma~\ref{lemma:dual_sep_random}). From the robust optimization perspective, this is equivalent to reducing the size of the uncertainty set by leaving the bulk unlikely region of the uncertainty set unconstrained. In other word, the size of the red ball in Figure~\ref{fig:geom_interpretation} is much smaller in the randomized case.
+\subfile{prob}
 
 \subfile{greedy}
+
 \subfile{multi}
+
+%\subfile{group}
+
 \subfile{exper}
 
+\backmatter
 \begin{thebibliography}{99}
     \providecommand{\natexlab}[1]{#1}
     \providecommand{\url}[1]{\texttt{#1}}

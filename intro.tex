@@ -31,13 +31,31 @@ Hopkins155~\cite{tron2007benchmark,elhamifar2009ssc}测试集上，SSC是目前�
 
 SSC算法的关键是将每个数据点用其他点线性表示，由于每个点都在一个低维子空间中，则一定存在一个相对稀疏的表示，
 只用到同一个子空间中的点。如果把系数大小看作两个点的连接权重，我们可以得到一个无向图，再对这个图进行谱聚类，
-即可将不同子空间的点分开。如果用第~\ref{sec:prob_setup}节中的符号描述，那么无噪音和有噪音的 SSC 分别求解
+即可将不同子空间的点分开。如果用第~\ref{chp:prob_setup}节中的符号描述，那么无噪音和有噪音的 SSC 分别求解
 \begin{align*}
   \min_{c_i} \|c_i\|_1\quad s.t.\quad X_i=X_{\{i\}^c}c_i, \\
   \min_{c_i} \|c_i\|_1+\frac{\lambda}{2}\|X_i-X_{\{i\}^c}c_i\|^2,
 \end{align*}
 $X_i$ 表示数据矩阵的第$i$ 列， $c_i$ 是$X_i$ 用其他所有点表示的系数，我们希望其非零元素对应的数据点都和 $x_i$ 在同一个子空间。
 对于仿射子空间，SSC 同样适用，只需要加上 $c_i = i$的限制。
+
+\begin{algorithm}[tb]
+  \caption{Sparse Subspace Clustering}
+  \label{alg:SSC}
+  \begin{algorithmic}
+    \State {\bfseries Input:}
+    Data points as columns in $X\in \mathbb{R}^{n\times N}$.
+    \State{1. } For each data point $x_i$, solve
+    \begin{align}\label{eq:SSC}
+      \min_{c_i} \; \|c_i\|_1 \quad s.t. \quad &x_i=X_{-i}c_i
+    \end{align}
+    \State{2. } Let $C:=[c_1,...,c_N]$. Form affinity graph $G$ that is represented by adjacency matrix $W=|C|+|C|^T$.
+    \State{3. } Estimate the number of subspace by finding the largest eigenvalue gap of normalized Laplacian of $G$ via
+    $$\hat{L}=N-\underset{i=1,...,N-1}{\text{argmax}}\; \sigma_i-\sigma_{i+1}$$
+    \State{4. } 对 $G$ using $\hat{L}$.
+    \State {\bfseries Output:} Subspace partitions $\mathcal{X}_1,...,\mathcal{X}_{\hat{L}}$
+  \end{algorithmic}
+\end{algorithm}
 
 然而，在 SSC 中，我们每次只考虑一个点相对于其他点的表示，
 比较容易受到噪音和异常点的干扰。如果我们预先知道点$A,B,C$
@@ -100,8 +118,6 @@ A number of methods have been shown working under the \emph{independent subspace
 \end{table}
 
 
-
-We remark that our robust analysis extends from \cite{soltanolkotabi2011geometric} and therefore is inherently capable of handling the same range of problems, namely disjoint and overlapping subspaces. This is formalized later in Section~\ref{sec:main}.
 
 \subsection{Robust performance guarantee}
 

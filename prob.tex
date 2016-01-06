@@ -33,11 +33,17 @@ LASSO的稀疏子空间聚类。首先，我们考虑将数据点聚成许多小
 其中$\|c\|_{\Omega}:= \sum_{I\in \Omega}\|c_{I}\|_2$。
 这相当于要求每个点都用尽量少的小类表示。
 
-\section{初步聚类}
+\section{初步聚类} 
 
 第一步要将数据点分成若干组，使得每一组里的点属于同个子空间。为了做到这点
-必须利用数据的空间性质，然而如果只考虑数据点的邻居，无疑忽略了线性空间的性质，
-于是我们定义一个新的点到点集距离：
+必须利用数据的空间性质，然而如果只考虑数据点之间的欧式距离，无疑忽略了线性空间的性质，
+所以我们尝试用贪心的方法构造出每个点的局部子空间，进而考虑投影最近邻。
+
+首先假设子空间都通过原点，那么我们可以将每个点归一化为单位向量。
+如果只看一个点$x_0$，最有可能和$x_0$在同一子空间的点自然是其投影最近邻，
+即在$x_0$方向投影最大的点，记作$x_1$。然后$x_0$，$x_1$和原点张成了一个
+二维平面，可以找到新的投影最近邻$x_2$，进而将$x_2$加入寻找下一个最投影近邻。
+我们定义一个新的点到点集距离：
 \begin{definition}[点到空间距离]\label{def:space_distance}
   设$x\in \R^d, X\in \R^{d\times n}$，$k$为给定正整数，我们有距离函数
   $$ d(x, X, k) = \begin{cases} \|x -\cP_{U_{1:k}} x\|_2 & \text{非仿射空间}\\
@@ -47,9 +53,7 @@ LASSO的稀疏子空间聚类。首先，我们考虑将数据点聚成许多小
 \end{definition}
 如果我们已经有了$n$个点那么就可以再取下一个离点集最近的点。
 
-下一个问题是每一组应该选取多少个点，如果取得过少，不能很好的发挥Group LASSO
-和Multitasking 的作用，如果过多，很可能有错误点。
-
+下面给出计算每个点的拓展最近邻的算法
 \begin{algorithm} \caption{拓展最近邻}
   \begin{algorithmic} \label{alg:nsn}
     \Require $n$ 个样本点 $\mathcal{X} = \{x_1,\ldots,x_n\}$, 所需邻居的个数
@@ -84,70 +88,26 @@ stored in the form of a matrix $U \in \mathbb{R}^{p \times
   computational cost, this can be reduced to $O(KpN^2)$, and the faster
   which solve a convex program with $N^2$ variables and $pN$ constraints.
 
-\paragraph{记号: }
-我们记无噪音的数据矩阵为 $Y \in \mathbb{R}^{d\times n}$,  $Y$ 的每一列都属于$L$
-个子空间的交
-$$\mathcal{S}_1 \cup \mathcal{S}_2 \cup...\cup \mathcal{S}_L.$$
-并且都是单位向量
-\footnote{单位化的条件能使后面的证明叙述简洁，不过我们的结论能拓展到一般的情形只需要对后面给出的条件稍作修改。}。
+得到每个点的K近邻之后，还要把点分成若干组，因为这些近邻之间有重叠，但是后面的Multtasking
+和 Group LASSO方法要求每个点只能在一个组中。当然这里可以直接使用谱聚类，不过简单
+起见，我们直接采用“先到先得“的原则，先找到一个未分组的点$x_1$，
+将其K近邻中没有分组的分成一组，再找下一个未分组点，直到分完所有点。
+实际计算中，为了消除取点带来的随机性，我们总是按照2-范数从大到小，依次选取，最终
+得到每个分组的指标集的集合$\Omega$。
 
-每个子空间 $\mathcal{S}_{\ell}$ 的维度是 $d_{\ell} \le d$ 并且有 $n_{\ell}$
-个采样点，满足$n_1 +n_2+...+n_L=n$. 我们观察到的带噪音的数据矩阵为 $X = Y+Z$,
-其中 $Z$ 是噪音矩阵. 令 $Y^{(\ell)}\in \mathbb{R}^{d\times n_{\ell}}$ 表示 
-$Y$ 中属于 $\mathcal{S}_{\ell}$ 的列组成的矩阵，相应的我们可以定义 $X^{(\ell)}$ 和 $Z^{(\ell)}$.
-不失一般性地，令$X=[X^{(1)},X^{(2)},...,X^{(L)}]$ ，即采样点按照子空间聚在一起.
-花体字母 $\mathcal{X},\mathcal{Y_{\ell}}$ 表示对应矩阵（即 $X$ 和 $Y^{(\ell)}$）的所有列向量组成的集合。
-
-对任一矩阵 $X$, $\mathcal{P}(X)$ 表示其所有列向量张成的对称凸包，即
-$\mathcal{P}(X) = \mathrm{conv}(\pm \mathcal{X})$。简记
-$\mathcal{P}_{I^c}^{(\ell)} := \mathcal{P}(X_{I^c}^{(\ell)}), \mathcal{Q}_{I^c}^{(\ell)} :=
-\mathcal{P}(Y_{I^c}^{(\ell)})$。$\mathbb{P}_{\mathcal{S}}$ 和
-$\mathrm{Proj}_{\mathcal{S}}$ 表示子空间 $\mathcal{S}$
-的投影矩阵和投影算子。我们使用$X_i$ 表示矩阵$X$ 的第$i$列，$X_i^T$ 表示矩阵转置后的第$i$列, $X_I$
-表示将$X$矩阵的列按照指标集$I$取出后组成的子矩阵.
-同理$X^T_I$是转置后的子矩阵。定义$\|X\|_{2, 1}:= \sum_i \|X_i\|_2$ ,
-$\norm(X)$是将$X$的每一列归一化（$X_i \neq \mathbf{0}$），$\langle X, Y \rangle
-:= \tr(X^T Y)$。
-
-\section{Group LASSO 和 Multitasking}
+\section{Multitasking 稀疏方法}
 原有的 SSC 方法，主要求解下面的优化问题
-\begin{equation}\label{eq:SSC}
-  \begin{aligned}
-    \min_{c_i} \; \|c_i\|_1 \quad s.t. \quad &x_i=X_{I^c}c_i,
-  \end{aligned}
-\end{equation}
-for each data point $x_i$. Solutions are arranged into matrix $C=[c_1,...,c_N]$, then spectral clustering techniques such as \cite{ng2002spectral} are applied on the affinity matrix $W=|C|+|C|^T$ ($|\cdot|$ represents entrywise absolute value). Note that when $Z\neq 0$, this method breaks down: indeed \eqref{eq:SSC} may even be infeasible.
+\begin{align}\label{eq:Lasso}
+  \min_{c_i} \; &\|c_i\|_1+\frac{\lambda}{2}\|x_i-X_{-i}c_i\|^2.
+\end{align}
+在有了初步的分组信息后，我们转而求解新的优化问题
+\begin{align} \label{eq:Multi}
+  \min_{C_I} \|C_I^T\|_{2, 1} + \frac{\lambda}{2} \|X_I - X_{I^c}C_I\|_F^2
+\end{align}
+其中$I\in \Omega$ 为某个分组的指标集。类似地，我们要用$C_I$组成邻接矩阵，进而
+做谱分解。不过不同于SSC，在每个分组内部我们缺少邻接关系，因此取$\max C_I$为
+组内两点的连接权重，构造出完整的邻接矩阵，再进行谱聚类。
 
-To handle noisy $X$, a natural extension is to relax the equality constraint in \eqref{eq:SSC} and solve the following unconstrained minimization problem instead \cite{elhamifar2012ssc_journal}:
-\begin{equation}\label{eq:Lasso}
-\begin{aligned}
-\min_{c_i} \; &\|c_i\|_1+\frac{\lambda}{2}\|x_i-X_{I^c}c_i\|^2.
-\end{aligned}
-\end{equation}
-We will focus on Formulation~\eqref{eq:Lasso} in this paper. Notice that \eqref{eq:Lasso} coincides with standard LASSO. Yet, since our task is subspace clustering, the analysis of LASSO (mainly for the task of support recovery) does not extend to SSC. In particular, existing literature for LASSO to succeed requires the dictionary $X_{I^c}$ to satisfy the Restricted Isometry Property~\cite[RIP for short;][]{candes2008RIP} or the Null-space property~\cite{donoho2006BPDN},  but neither of them is satisfied in the subspace clustering setup.\footnote{As a simple illustrative example, suppose there exists two identical columns in $X_{I^c}$, which violates RIP for 2-sparse signal and has maximum incoherence $\mu(X_{I^c})=1$.}
+\section{Group LASSO 方法}
 
-In the subspace clustering task, there is no single ``ground-truth'' $C$ to compare the solution against. Instead, the algorithm succeeds if each sample is expressed as a linear combination of samples belonging to the same subspace, as the following definition states.
-\begin{definition}[LASSO Subspace Detection Property]\label{def:lasso_detection}
-We say the subspaces $\{\mathcal{S}_{\ell}\}_{\ell=1}^{k}$ and noisy sample points $X$ from these subspaces obey LASSO subspace detection property with parameter $\lambda$, if and only if it holds that for all $i$, the optimal solution $c_i$ to \eqref{eq:Lasso} with parameter $\lambda$ satisfies:\\
-\indent (1) $c_i$ is not a zero vector, i.e., the solution is non-trivial,
-\indent (2) Nonzero entries of $c_i$ correspond to only columns of $X$ sampled from the same subspace as $x_i$.
-\end{definition}
-This property ensures that the output matrix $C$ and (naturally) the affinity matrix $W$ are exactly block diagonal with each subspace cluster represented by a disjoint block.  The property is illustrated in Figure~\ref{fig:SEP}. For convenience, we will refer to the second requirement alone as ``\emph{Self-Expressiveness Property}''~(SEP), as defined in \cite{elhamifar2012ssc_journal}.
-
-Note that the LASSO Subspace Detection Property is a strong condition. In practice, spectral clustering does not require the exact block diagonal structure for perfect segmentation in our simulation section for details). A caveat is that it is also not sufficient for perfect segmentation, since it does not guarantee each diagonal block forms a connected component. This is a known problem for SSC \cite{nasihatkon2011graph}, although we observe that in practice graph connectivity is usually not a big issue. Proving the high-confidence connectivity (even under probabilistic models) remains an open problem, except for the almost trivial cases when the subspaces are independent \cite{liu2013LRR, wang2013provable}.
-
-\begin{figure}
-  \centering
-  % Requires \usepackage{graphicx}
-  \includegraphics[width=0.35\linewidth]{pics/SEP.png}
-  \includegraphics[width=0.35\linewidth]{pics/ViolateSEP.png}\\
-  \caption{Illustration of LASSO-Subspace Detection Property/Self-Expressiveness Property. \textbf{Left:} SEP holds. \textbf{Right:} SEP is violated even though spectral clustering is likely to cluster this affinity graph perfectly into 5 blocks.}\label{fig:SEP}
-\end{figure}
-
-\begin{tabular}{ll}
-  $\bullet$ fully deterministic model;\\
-  $\bullet$ deterministic data with random noise;\\
-  $\bullet$ semi-random data with random noise;\\
-  $\bullet$ fully random model.
-\end{tabular}
 \end{document}

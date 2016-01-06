@@ -1,9 +1,89 @@
 \documentclass[main.tex]{subfiles}
 \begin{document}
-\chapter{确定情形下的证明}\label{chp:proof_multi}
+\chapter{Multitasking的正确性}\label{chp:proof_multi}
+We start by defining two concepts adapted from the original proposal of \cite{soltanolkotabi2011geometric}.
+\begin{definition}[投影对偶空间]\label{def:proj_dual_direction}
+  令 $N$ 为下面对偶问题的最优解
+  \begin{align*}
+    \max_{N} \; \langle Y, N \rangle - \frac{1}{2\lambda}\| N
+    \|_F^2,\quad\text{subject to:}\quad &\|N^T X\|_{2, \infty} \leq 1;
+  \end{align*}
+  $\mathcal{S}$ 为一个低维子空间。令$ \tilde{N} := \mathbb{P}_{\mathcal{S}} N$，
+  对$\tilde{N}$ 进行紧致svd，有
+  $$ \tilde{N} = \tilde{U} \Sigma V^T, \quad \tilde{U} \in \mathbb{R}^{d \times r}. $$
+  则{\em 投影对偶空间} $\mathcal{U}$ 定义为
+  $$\mathcal{U}(Y,X,\mathcal{S},\lambda)\triangleq \spa \{ \tilde{U}_i, i = 1\dots r \}.$$
+\end{definition}
+ %One way to interpret the optimal solution $N$ is that this is the Euclidean projection of $\lambda x$ to the polytope $\|X^TN\|_{\infty} \leq 1$ and $v$ is the direction of the projection of $N$ to subspace $\cS$.
 
-%,\ref{thm:thm_random_noise},\ref{thm:semirandom}~and~\ref{thm:fullrandom}.
-我们不直接分析\eqref{eq:Lasso}，而是引入松弛变量$E_I$，将其转化为有限制的等价形式：
+
+\begin{definition}[投影子空间的非相干性]\label{def:incoherence}
+  对于第$l$个子空间，我们指标集$I$，和其对应的投影对偶空间
+  $\mathcal{U}_I^{(\ell)}=\mathcal{U}(X_I^{(\ell)},X_{I^c}^{(\ell)},\mathcal{S}_{\ell},\lambda)$。
+  我们称集合 $\mathcal{X}_{\ell}$ 和其他点的不相干度为 $\mu$，如果
+  \begin{align*}
+    \mu\geq \mu(\mathcal{X}_{\ell}) := &\max_{y\in \mathcal{Y}\setminus \mathcal{Y}_{\ell}}
+    \max_{I \in \mathcal{I}(l)} \|\mathbb{P}_{\mathcal{U_I}} y\|_2.
+  \end{align*}
+\end{definition}
+
+Here, $\mu$ measures the incoherence between corrupted subspace samples $\mathcal{X}_{\ell}$ and clean data points in other subspaces. As $\|y\|=1$ by the normalization assumption, the range of $\mu$ is $[0,1]$. In case of random subspaces in high dimension, $\mu$ is close to zero. Moreover, as we will see later, for deterministic subspaces and random data points, $\mu$ is proportional to their expected angular distance (measured by cosine of canonical angles).
+
+Definition~\ref{def:proj_dual_direction}~and~\ref{def:incoherence} differ from the \emph{dual direction} and \emph{subspace incoherence property} of \cite{soltanolkotabi2011geometric} in that we require a projection to a particular subspace to cater to the analysis of the noise case. Also, since they reduce to the original definitions when data are noiseless and $\lambda\rightarrow \infty$, these definitions can be considered as a generalization of their original version.
+
+\begin{definition}[子空间自表示性]\label{def:lasso_detection}
+若一族子空间 $\{\mathcal{S}_{\ell}\}_{\ell=1}^{k}$ 及其带噪音采样点 $X$ 在参数
+$\lambda$ 和分组$\Omega$下满足子空间自表示性，当且仅当对所有 $I\in \Omega$，
+优化问题 \eqref{eq:Multi} 的最优解$C_I$ 满足：\\
+\indent (1) $C_I$ 的每一列都不是零向量，即解非平凡，
+\indent (2) $C_I$ 的非零行向量只对应 $X$
+中于与点集$X_I$同一子空间的点，即只用相同子空间的点来表示。
+\end{definition}
+上面的性质保证了我们得到的系数矩阵 $C$ 和邻接矩阵 $W$
+具有块对角性质，只要每个子空间的点指标相邻，如图~\ref{fig:SEP}
+所示，上面的自表示性定义是对 \cite{elhamifar2012ssc_journal}
+中定义的一个自然拓展。
+
+需要注意的是子空间自表示性是一个很强的条件，实际中，谱聚类很可能无需完全块对角的
+邻接矩阵就能得到正确解。另一方面它也不能一定保证正确的聚类，因为缺乏对每个对角块
+内部连接状况的保证。稀疏方法的高连接性证明任然是一个待解决的问题，除了对子空间相
+互独立的平凡情形 \cite{liu2013LRR, wang2013provable}。
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.35\linewidth]{pics/SEP.png}
+  \includegraphics[width=0.35\linewidth]{pics/ViolateSEP.png}\\
+  \caption{\textbf{左：} 子空间自表示性满足， \textbf{右：}自表示性不满足，但谱聚类任然很可能将邻接图聚成 5 类。}
+  \label{fig:SEP}
+\end{figure}
+
+\section{自表示定理}
+\paragraph{记号: }
+我们记无噪音的数据矩阵为 $Y \in \mathbb{R}^{d\times n}$,  $Y$ 的每一列都属于$L$
+个子空间的交
+$$\mathcal{S}_1 \cup \mathcal{S}_2 \cup...\cup \mathcal{S}_L.$$
+并且都是单位向量
+\footnote{单位化的条件能使后面的证明叙述简洁，不过我们的结论能拓展到一般的情形只需要对后面给出的条件稍作修改。}。
+
+每个子空间 $\mathcal{S}_{\ell}$ 的维度是 $d_{\ell} \le d$ 并且有 $n_{\ell}$
+个采样点，满足$n_1 +n_2+...+n_L=n$. 我们观察到的带噪音的数据矩阵为 $X = Y+Z$,
+其中 $Z$ 是噪音矩阵. 令 $Y^{(\ell)}\in \mathbb{R}^{d\times n_{\ell}}$ 表示 
+$Y$ 中属于 $\mathcal{S}_{\ell}$ 的列组成的矩阵，相应的我们可以定义 $X^{(\ell)}$ 和 $Z^{(\ell)}$.
+不失一般性地，令$X=[X^{(1)},X^{(2)},...,X^{(L)}]$ ，即采样点按照子空间聚在一起.
+花体字母 $\mathcal{X},\mathcal{Y_{\ell}}$ 表示对应矩阵（即 $X$ 和 $Y^{(\ell)}$）的所有列向量组成的集合。
+
+对任一矩阵 $X$, $\mathcal{P}(X)$ 表示其所有列向量张成的对称凸包，即
+$\mathcal{P}(X) = \mathrm{conv}(\pm \mathcal{X})$。简记
+$\mathcal{P}_{I^c}^{(\ell)} := \mathcal{P}(X_{I^c}^{(\ell)}), \mathcal{Q}_{I^c}^{(\ell)} :=
+\mathcal{P}(Y_{I^c}^{(\ell)})$。$\mathbb{P}_{\mathcal{S}}$ 和
+$\mathrm{Proj}_{\mathcal{S}}$ 表示子空间 $\mathcal{S}$
+的投影矩阵和投影算子。我们使用$X_i$ 表示矩阵$X$ 的第$i$列，$X_i^T$ 表示矩阵转置后的第$i$列, $X_I$
+表示将$X$矩阵的列按照指标集$I$取出后组成的子矩阵.
+同理$X^T_I$是转置后的子矩阵。定义$\|X\|_{2, 1}:= \sum_i \|X_i\|_2$ ,
+$\norm(X)$是将$X$的每一列归一化（$X_i \neq \mathbf{0}$），$\langle X, Y \rangle
+:= \tr(X^T Y)$。
+
+我们不直接分析\eqref{eq:Multi}，而是引入松弛变量$E_I$，将其转化为有限制的等价形式：
 \begin{align}\label{eq:Opt_original}
   \mathbf{P}_0:\quad \min_{C_I, E_I} \;
   \|C_I^T\|_{2,1}+\frac{\lambda}{2}\|E_I\|_F^2 \quad
@@ -21,6 +101,7 @@ The dual program of \eqref{eq:Opt_original} is:
   \end{aligned}
 \end{equation}
 Recall that we want to establish the conditions on noise magnitude $\delta$, structure of the data ($\mu$ and $r$ in the deterministic model and affinity in the semi-random model), and ranges of valid $\lambda$ such that by Definition~\ref{def:lasso_detection}, the solution $c_i$ is \emph{non-trivial} and has support indices inside the column set $X^{(\ell)}_{I^c}$ (i.e., satisfies SEP).
+
 考虑一个一般的凸优化问题：
 \begin{align}\label{eq:Opt_A_general}
   \quad \min_{C, E} \; &\|C^T\|_{2,1}+\frac{\lambda}{2}\|E\|^2_F \quad &s.t. \quad Y=XC+E.
@@ -124,7 +205,6 @@ We state Lemma~\ref{lemma:OptimalCondition}, which extends Lemma~7.1 in \cite{so
 这个可行解就是 \eqref{eq:Opt_original} 的最优解，于是 SEP 成立。
 
 \subsection{对偶矩阵的限制}\label{sec:dual_separation}
-%Recall that in order for SEP to hold, we need the constructed dual certificate $N$ in Section~\ref{sec:construct_nu} to obey \eqref{eq:dual_separation_condition} for all data point $x \in \mathcal{X}\setminus \mathcal{X}^{\ell}$.
 
 Our strategy to show \eqref{eq:dual_separation_condition} is to provide an upper bound of $|\langle x, N \rangle|$ then impose the inequality on the upper bound.
 
@@ -168,6 +248,20 @@ It turns out that the geometric properties of this relaxed feasible region provi
   \text{的最大内接球}.\label{eq:Geometric_dual}
 \end{align}
 注意到$\cP(\dot)$ 是对称凸包，则 $\cP(\dot)$ 的最大内接球中心在原点。
+
+\begin{definition}[内接球半径]
+凸包 $\mathcal{P}$的内接球半径是指包含在$\mathcal{P}$内的最大欧式球的半径，
+记作 $r(\mathcal{P})$。 
+\end{definition}
+The inradius of a $\mathcal{Q}_{-i}^{(\ell)}$ describes the dispersion of the data points. Well-dispersed data lead to larger inradius and skewed/concentrated distribution of data have small inradius. An illustration is given in Figure~\ref{fig:inradius}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\linewidth]{pics/inradius.png}\\
+  \caption{数据点分布和其内接球半径的关系，内接球半径可以度量这些店能否很好地表示子空间。}
+  \label{fig:inradius}
+\end{figure}
+
 我们有如下引理。
 
 \begin{lemma}\label{lemma:circum_inradius}
@@ -429,6 +523,6 @@ $$
 Check that \eqref{eq:deterministic_delta} is sufficient for the above $3$rd order inequality to hold. Therefore,
 $$\eqref{eq:deterministic_delta}\Rightarrow A\delta^3+B\delta^2+C\delta+D<0 \Leftrightarrow \eqref{eq:nonempty_cond}
 \Rightarrow \text{\eqref{eq:lambda_range} is not an empty set.}$$
-This completes the proof of Theorem~\ref{thm:thm_general}.
+%This completes the proof of Theorem~\ref{thm:thm_general}.
 
 \end{document}
