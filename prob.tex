@@ -102,12 +102,19 @@ stored in the form of a matrix $U \in \mathbb{R}^{p \times
 \end{align}
 在有了初步的分组信息后，我们转而求解新的优化问题
 \begin{align} \label{eq:Multi}
-  \min_{C_I} \|C_I^T\|_{2, 1} + \frac{\lambda}{2} \|X_I - X_{I^c}C_I\|_F^2
+  \min_{C_I}\; & \|C_I^T\|_{2, 1} + \frac{\lambda}{2} \|X_I - X_{I^c}C_I\|_F^2
 \end{align}
 其中$I\in \Omega$ 为某个分组的指标集。类似地，我们要用$C_I$组成邻接矩阵，进而
 做谱分解。不过不同于SSC，在每个分组内部我们缺少邻接关系，因此取$\max C_I$为
 组内两点的连接权重，构造出完整的邻接矩阵，再进行谱聚类。
 
 \section{Group LASSO 方法}
+定义范数$\|x\|_{\Omega}:=\sum_{I\in \Omega} \|x_I\|_2$，不同于\ref{eq:Lasso}，Group LASSO 方法考虑下面的优化问题
+\begin{align}
+  \min_{c_i \; & \|c_i\|_{\Omega} + \frac{\lambda}{2} \|x_i - X_{-i}
+  c^{(i)}\|_2^2
+  \label{eq:group}
+\end{align}
+其中$c_i$是$x_i$对应的系数。
 
 \end{document}
