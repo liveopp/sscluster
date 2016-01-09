@@ -1,5 +1,50 @@
 \documentclass[main.tex]{subfiles}
 \begin{document}
 \chapter{Group LASSO正则化的正确性}\label{chp:proof_group}
-类似于MultiTasking 的情形， 
+简单起见，本章不考虑噪音。类似于MultiTasking 的情形，我们希望能得到
+自表示的充分条件。
+
+\section{确定性模型下的分析}
+我们考虑下面的模型。令 $X^\ell$ 为第$\ell$个子空间中的点组成
+矩阵，于是
+$$ X^\ell = D_\ell A^{\ell} ,$$ 
+其中 $A^\ell$ 的每一列都在 单位球面$\S^{d_\ell-1}$ 上。
+
+在无噪音假设下，\ref{eq:group} 可以简化。我们考虑下面的优化问题
+\begin{align}
+  \P(y,M): \,\, & \min \| c\|_{\Omega} \\
+                & \mbox{s.t.}\,\, Mc = y
+  \label{eq:group_primal}
+\end{align}
+其对偶问题为 
+\begin{align}
+  \D(y,M): \,\, &\max \,\, \la y, \lambda\ra \\
+                & \mbox{s.t.}\,\, \|M^T\lambda\|_{\Omega,\infty} \leq 1
+\end{align}
+其中$\|x\|_{\Omega, \infty} = \max_{I \in \Omega} \|x_I\|_2$。
+
+我们有如下引理 
+\begin{lemma}
+  \label{lem:prim_dual}
+  若存在 $c$ 满足 $y = Mc$，其支撑集 $S \subseteq T$，进一步地，
+  存在 $\lambda$ 满足
+  \begin{align*}
+    [M_{S}^T \lambda]_I = \frac{c_I}{\|c_I\|_2} \, \forall I \in \Omega_S\\
+    \|M_{T\cap S^c}^T \lambda\|_{\Omega,\infty} \leq 1 \\
+    \|M_{T^c}^T \lambda\|_{\Omega,\infty} < 1
+  \end{align*}
+\end{lemma}
+\begin{proof}
+  证明类似于引理\ref{lemma:OptimalCondition}，只需要去除误差项，
+  稍作代换即可。
+\end{proof}
+
+\subsection{自表示的几何条件}
+同样类似于Multitasking方法，我们构造二元组满足引理\ref{lem:prim_dual}的要求。
+令 $c_{i}^{\ell}$ 是原问题 $\P(a_i^{\ell}, }_{-i,\mb{G}}^{\ell})$ 的解，
+$\lambda_i^{\ell}$ 为对偶问题 $\D(a_{i}^{\ell}, A_{-i}^{\ell})$.
+\item Define the \emph{group-dual direction} for points $\V{a}_{i}^{\ell}$, $i = 1,2,...,N_\ell$ via 
+\begin{align}
+{\V{v}}_i^\ell = \M{Q}_{\mb{G}}^{\ell} \frac{\V{\lambda}_i^\ell}{\|\V{\lambda}_i^\ell \|_2}
+\end{align}
 \end{document}
