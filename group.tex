@@ -41,10 +41,20 @@ $$ X^\ell = D_\ell A^{\ell} ,$$
 
 \subsection{自表示的几何条件}
 同样类似于Multitasking方法，我们构造二元组满足引理\ref{lem:prim_dual}的要求。
-令 $c_{i}^{\ell}$ 是原问题 $\P(a_i^{\ell}, }_{-i,\mb{G}}^{\ell})$ 的解，
+令 $c_{i}^{\ell}$ 是原问题 $\P(a_i^{\ell}, A_{-i}^{\ell})$ 的解，
 $\lambda_i^{\ell}$ 为对偶问题 $\D(a_{i}^{\ell}, A_{-i}^{\ell})$.
-\item Define the \emph{group-dual direction} for points $\V{a}_{i}^{\ell}$, $i = 1,2,...,N_\ell$ via 
-\begin{align}
-{\V{v}}_i^\ell = \M{Q}_{\mb{G}}^{\ell} \frac{\V{\lambda}_i^\ell}{\|\V{\lambda}_i^\ell \|_2}
-\end{align}
+定义 \emph{group-dual direction} 为 $a_{i}^{\ell}$, $i = 1,2,...,N_\ell$ via 
+$$ v_i^\ell = \D^{\ell} \frac{\lambda_i^\ell}{\|\lambda_i^\ell \|_2} $$
+类似于Multitaking 情形，将$c_i^{\ell}$相应扩充（其余位置补零），令 $\nu_i^\ell
+= D^{\ell} \lambda_i^\ell$。 于是要满足引理 \ref{lem:prim_dual}
+的条件，主要要满足 
+$$ \| X^T_I \nu_i^\ell\|_2 < 1 \, \forall I \in \Omega_{-\ell},$$
+及要求
+$$\| X^T_I v_i^\ell\|_2 \|\lambda_i^\ell\|_2 < 1$$
+我们首先给出$\|\lambda_i^\ell$的上界。
+
+注意到$\lambda_i^\ell$在集合
+$$P=\{ \lambda_i^\ell: \|A_{-i}^{\ell T}\|_{\Omega,\infity}
+
+\subsection{}
 \end{document}
