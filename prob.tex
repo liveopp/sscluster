@@ -111,7 +111,7 @@ stored in the form of a matrix $U \in \mathbb{R}^{p \times
 \section{Group LASSO 方法}
 定义范数$\|x\|_{\Omega}:=\sum_{I\in \Omega} \|x_I\|_2$，不同于\ref{eq:Lasso}，Group LASSO 方法考虑下面的优化问题
 \begin{align}
-  \min_{c_i \; & \|c_i\|_{\Omega} + \frac{\lambda}{2} \|x_i - X_{-i}
+  \min_{c_i} \; & \|c_i\|_{\Omega} + \frac{\lambda}{2} \|x_i - X_{-i}
   c^{(i)}\|_2^2
   \label{eq:group}
 \end{align}

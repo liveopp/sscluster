@@ -18,7 +18,7 @@ $$ X^\ell = D_\ell A^{\ell} ,$$
 \end{align}
 其对偶问题为 
 \begin{align}
-  \D(y,M): \,\, &\max \,\, \la y, \lambda\ra \\
+  \D(y,M): \,\, &\max \,\, \langle y, \lambda\rangle \\
                 & \mbox{s.t.}\,\, \|M^T\lambda\|_{\Omega,\infty} \leq 1
 \end{align}
 其中$\|x\|_{\Omega, \infty} = \max_{I \in \Omega} \|x_I\|_2$。
@@ -54,11 +54,11 @@ $$\| X^T_I v_i^\ell\|_2 \|\lambda_i^\ell\|_2 < 1$$
 我们首先给出$\|\lambda_i^\ell$的上界。
 
 注意到$\lambda_i^\ell$在集合
-$$P=\{ \lambda_i^\ell: \|A_{-i}^{\ell T}\|_{\Omega,\infity\}$$
+$$P=\{ \lambda_i^\ell: \|A_{-i}^{\ell T}\|_{\Omega,\infty}\}$$
 由$P$的中心对称性，可知$P$的外接圆半径是$\|\lambda_i^\ell\|_2$的
 上界。定义集合 $P^\circ$ 为 
 \begin{align*} 
-  P^\circ = \{ z: z = A_{-i}}^{\ell} b,\,\, : \|b\|_{\Omega,1} \leq 1\},
+  P^\circ = \{ z: z = A_{-i}^{\ell} b,\,\, : \|b\|_{\Omega,1} \leq 1\},
 \end{align*} 
 由\cite{ball1997intro_convex_geometry}，$R(P) = \frac{1}{r(P^\circ)}$，于是
 \begin{align*} 
