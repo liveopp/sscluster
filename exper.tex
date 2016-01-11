@@ -2,12 +2,12 @@
 \begin{document}
 \chapter{数值实验}\label{chp:experiments}
 
-To demonstrate the practical implications of our robustness guarantees for LASSO-SSC, we conduct four numerical experiments including three with synthetic generated data and one with real data. For fast computation, we use ADMM implementation of LASSO solver
-  with default numerical parameters. Its complexity is proportional to the problem size and the convergence guarantee \cite{boyd2011admm}. We also implement a simple ADMM solver for the matrix version SSC
+\ref{eq:Multi} 和 \ref{eq:group} 都可以写成矩阵的形式
 \begin{align}\label{eq:MatrixLasso}
-\min_{C} \; \|C\|_1+\frac{\lambda}{2}\|X-XC\|_F^2 \quad
-\text{s.t.} \;\quad\mathrm{diag}(C)=0,
+  \min_{C} \; \|C\|_{\Omega}+\frac{\lambda}{2}\|X-XC\|_F^2 \quad
+  \text{s.t.} \;\quad\mathrm{diag}(C)=0, \text{or} \quad \mathrm{B-diag}(C)=0,
 \end{align}
-which is consistently faster than the column-by-column LASSO version. This algorithm is first described in \cite{elhamifar2012ssc_journal}. To be self-contained, we   provide the pseudocode and some numerical simulation in the appendix.
+其中$\|\dot\|_{\Omega}$ 为某个与指标集集合$\Omega$有关的凸范数。
 \section{ADMM 算法}
+未完
 \end{document}

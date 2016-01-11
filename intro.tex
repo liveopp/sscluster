@@ -43,17 +43,15 @@ $X_i$ 表示数据矩阵的第$i$ 列， $c_i$ 是$X_i$ 用其他所有点表示
   \caption{Sparse Subspace Clustering}
   \label{alg:SSC}
   \begin{algorithmic}
-    \State {\bfseries Input:}
-    Data points as columns in $X\in \mathbb{R}^{n\times N}$.
-    \State{1. } For each data point $x_i$, solve
+    \State {\bfseries 输入：}
+    采样点组成的矩阵 in $X\in \mathbb{R}^{d\times n}$，和类数$L$
+    \State{1. } 对每个点 $x_i$，求解下面的问题
     \begin{align}\label{eq:SSC}
       \min_{c_i} \; \|c_i\|_1 \quad s.t. \quad &x_i=X_{-i}c_i
     \end{align}
-    \State{2. } Let $C:=[c_1,...,c_N]$. Form affinity graph $G$ that is represented by adjacency matrix $W=|C|+|C|^T$.
-    \State{3. } Estimate the number of subspace by finding the largest eigenvalue gap of normalized Laplacian of $G$ via
-    $$\hat{L}=N-\underset{i=1,...,N-1}{\text{argmax}}\; \sigma_i-\sigma_{i+1}$$
-    \State{4. } 对 $G$ using $\hat{L}$.
-    \State {\bfseries Output:} Subspace partitions $\mathcal{X}_1,...,\mathcal{X}_{\hat{L}}$
+    \State{2. } 令 $C:=[c_1,...,c_N]$， 构造邻接图 $G$，其邻接矩阵 $W=|C|+|C|^T$
+    \State{3. } 对 $G$ 进行谱聚类 
+    \State {\bfseries 输出：} 谱聚类结果
   \end{algorithmic}
 \end{algorithm}
 
@@ -68,7 +66,7 @@ $X_i$ 表示数据矩阵的第$i$ 列， $c_i$ 是$X_i$ 用其他所有点表示
 基于上面的考虑，本文结合了压缩感知中的 joint sparse 模型\cite{}， 提出了一种新的子空间聚类方法，它的核心内容有两步：
 第一步是根据点的空间信息，先将某些点聚在一起，组成若干组。第二部有两种方法，
 可以把一组的点作为整体，相对其他店做回归，要求他们同时被稀疏表示，这是
-\bf{Multitasking 方法}，也可以依然像SSC那样，把一个点用其他点表示，但是
+\emph{Multitasking 方法}，也可以依然像SSC那样，把一个点用其他点表示，但是
 采用类似于Group LASSO的优化范数。同样地得到表示系数，进而构造邻接矩阵。
 
 \end{document}

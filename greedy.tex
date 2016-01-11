@@ -1,6 +1,10 @@
 \documentclass[main]{subfiles}
 \begin{document}
-\chapter{初步聚类的正确性}\label{chp:proof_greedy}
+\chapter{初步聚类的正确性}\label{chp:greedy}
+在算法\ref{alg:nsn}中，每次新加入点都有可能影响投影平面，
+导致理论分析比较困难，因此我们在本章中只能给出$k_{max}=1$
+时的正确性条件。
+
 我们假设样本点满足\emph{半随机模型}，即每个子空间是确定的，
 但是采样点是在每个子空间中随机生成的。进一步地，
 不妨设采样点都是单位向量，这相当于它们都均匀采样于自身子空间的单位球上。

@@ -16,22 +16,12 @@ LASSO的稀疏子空间聚类。首先，我们考虑将数据点聚成许多小
 比如在运动分割中，无论摄像头、物体如何运动，同一个刚体上相近的几个点，在每一
 帧上的位置都会很近，因此在高维空间中依然相近。于是利用贪心的K近邻方法，可以
 将数据点初步聚类。如果将同一小类的点组成矩阵，我们得到$X_1, X_2, \cdots X_m$。
-对$i\in [m]$，考虑下面的优化问题
-\begin{align}
-  \min_C \|C^T\|_{2,1} + \frac{\lambda}{2} \|X_i - X_{-i}C_i\|_F^2
-  \label{wq:multi}
-\end{align}
-其中$X_{-i}$为$X_i$之外的所有数据点组成的矩阵，$\|C\|_{2, 1}:= \sum_i
-\|C_i\|_2$。利用所有的$C_i$和初步聚类结果，构造邻接矩阵，最后再进行谱聚类。
+对$i\in [m]$，$X_i$用其他数据点表示得到系数$C_i$，连同初步聚类结果，构造邻接矩阵，
+最后再进行谱聚类。
 
 另一方面，将每一类的下表集合记为$\Omega$，如果把SSC的$l_1$范数换成 group $l_1$
-范数，我们得到如下优化问题
-\begin{align}
-  \min_C \|c\|_{\Omega} + \frac{\lambda}{2}\|x_i - X_{-i} c_i\|_2^2
-  \label{eq:group}
-\end{align}
-其中$\|c\|_{\Omega}:= \sum_{I\in \Omega}\|c_{I}\|_2$。
-这相当于要求每个点都用尽量少的小类表示。
+范数，要求每个点都用尽量少的小类表示，这样可以保证系数具有较多的类内点上非零，
+进而构造邻接矩阵，进行谱聚类。
 
 \section{初步聚类} 
 
@@ -43,50 +33,25 @@ LASSO的稀疏子空间聚类。首先，我们考虑将数据点聚成许多小
 如果只看一个点$x_0$，最有可能和$x_0$在同一子空间的点自然是其投影最近邻，
 即在$x_0$方向投影最大的点，记作$x_1$。然后$x_0$，$x_1$和原点张成了一个
 二维平面，可以找到新的投影最近邻$x_2$，进而将$x_2$加入寻找下一个最投影近邻。
-我们定义一个新的点到点集距离：
-\begin{definition}[点到空间距离]\label{def:space_distance}
-  设$x\in \R^d, X\in \R^{d\times n}$，$k$为给定正整数，我们有距离函数
-  $$ d(x, X, k) = \begin{cases} \|x -\cP_{U_{1:k}} x\|_2 & \text{非仿射空间}\\
-    \|x - \cP{\tU_{1:k}} x\|_2 & \text{仿射空间} \end{cases},$$
-  其中$U$为$X$svd的左奇异向量矩阵，$\tU$为$\tX=X-\frac{1}{n}\sum_{i=1}^n
-  X_i$的svd左奇异向量矩阵。
-\end{definition}
-如果我们已经有了$n$个点那么就可以再取下一个离点集最近的点。
 
 下面给出计算每个点的拓展最近邻的算法
 \begin{algorithm} \caption{拓展最近邻}
   \begin{algorithmic} \label{alg:nsn}
     \Require $n$ 个样本点 $\mathcal{X} = \{x_1,\ldots,x_n\}$, 所需邻居的个数
-    $K$， 邻域子间维度 $k_{\max}$.
-    \Ensure 所有样本点的分组$\Omega$
-    \State $m=1$
-    \Repeat
-      \State 从$\cX$中任选一个点$x_0$
-      \State $\set{S}_m \gets \{x_0\}$ \Comment{$x_0$点张成的子空间}
+    $K$， 邻域子间维度 $k_{max}$.
+    \Ensure 所有样本点邻居关系$W$
+    \For {$i= 1,\ldots,n$} \Comment{遍历所有的点}
+      \State $\set{S} \gets \{x_i\}$ \Comment{$x_i$点张成的子空间}
       \For {$k = 1,\ldots,K$} \Comment{依次将最近邻加入子空间集合}
-        \State $x^* \gets \argmin_{x \in \cX  \setminus \set{S}_m} d(x, S_m,
-        k_{\max})$
-        \State $\set{S}_m \gets \set{S}_m \cup \{x^*\}$
+        \State $x^* \gets \argmin_{x \in \cX \setminus \set{S}} d(x,\spa\{\set{S}\})$
+        \If{$|\set{S}| < k_{max}$}
+          \State $\set{S} \gets \set{S} \cup \{x^*\}$
+        \EndIf
       \EndFor
-      \State $\Omega \gets \Omega \cup \set{S}_m$
-      \State $cX \gets \cX \setminus \set{S}_m$
-      \State $m=m+1$
-    \Until{$\cX$ 为空}
+      \State 根据$\set{S}$生成$W_i$
+    \EndFor
   \end{algorithmic}
 \end{algorithm}
-
-算法 \ref{alg:nsn} 将样本点分成SN collects $K$ neighbors sequentially for each point. At each step $k$, a
-$k$-dimensional subspace $\set{U}$ spanned by the point and its $k-1$ neighbors
-is constructed, and the point closest to the subspace is newly collected. After
-$k \ge k_{\max}$, the subspace $\set{U}$ constructed at the $k_{\max}$th step
-is used for collecting neighbors. At last, if there are more points lying on
-$\set{U}$, they are also counted as neighbors. The subspace $\set{U}$ can be
-stored in the form of a matrix $U \in \mathbb{R}^{p \times
-  \text{dim}(\set{U})}$ whose columns form an orthonormal basis of $\set{U}$.
-  Then $\|\proj_{\set{U}} y_j\|_2$ can be computed easily because it is equal
-  to $\|U^\top y_j\|_2$. While a naive implementation requires $O(K^2pN^2)$
-  computational cost, this can be reduced to $O(KpN^2)$, and the faster
-  which solve a convex program with $N^2$ variables and $pN$ constraints.
 
 得到每个点的K近邻之后，还要把点分成若干组，因为这些近邻之间有重叠，但是后面的Multtasking
 和 Group LASSO方法要求每个点只能在一个组中。当然这里可以直接使用谱聚类，不过简单

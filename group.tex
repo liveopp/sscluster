@@ -1,7 +1,7 @@
 \documentclass[main.tex]{subfiles}
 \begin{document}
-\chapter{Group LASSO正则化的正确性}\label{chp:proof_group}
-简单起见，本章不考虑噪音。类似于MultiTasking 的情形，我们希望能得到
+\chapter{Group LASSO方法的正确性}\label{chp:proof_group}
+简单起见，本章不考虑噪音。类似于Multitasking 的情形，我们希望能得到
 自表示的充分条件。
 
 \section{确定性模型下的分析}
@@ -69,6 +69,20 @@ $$P=\{ \lambda_i^\ell: \|A_{-i}^{\ell T}\|_{\Omega,\infty}\}$$
   \left\|X_{I}^T v_i^\ell \right\|_{2} \leq r(P^\circ)
   \label{eq:cond1}
 \end{align}
+由于$r(P^\circ)$的
+\subsection{半随机生成模型}
+在做人脸图片聚类时，一个常常碰到的问题是人脸位置，会有小的偏移和误差。
+所以在进行子空间聚类前需要手工对齐，这无疑降低了聚类算法的可用性。
+利用Group LASSO的性质，我们考虑所谓的\emph{半随机生成模型}，即有$n_p$个
+参考点，它们类似于第\ref{chp:greedy}章的假设，独立同分布地采样于子空间
+球面上的均匀分布。同时有$n_g$个线性变换$L_1, L_2,\ldots,L_{n_g}$，作用在
+参考点$w_i$ 上，得到$L_1 w_i, L_2 w_i, \ldots, L_{n_g} w_i$，总共得到
+$n_p \times n_g$个新样本点，这些样本点天然就有组别信息（那些同一个参考点
+生成的即为一组），于是可以应用Group LASSO的方法得到系数矩阵，进而转化成
+邻接矩阵。
 
-\subsection{}
+未完
+
+
+
 \end{document}
