@@ -2,12 +2,69 @@
 \begin{document}
 \chapter{数值实验}\label{chp:experiments}
 
-\ref{eq:Multi} 和 \ref{eq:group} 都可以写成矩阵的形式
+(\ref{eq:Multi}) 和 (\ref{eq:group}) 都可以写成矩阵的形式
 \begin{align}\label{eq:MatrixLasso}
   \min_{C} \; \|C\|_{\Omega}+\frac{\lambda}{2}\|X-XC\|_F^2 \quad
   \text{s.t.} \;\quad\mathrm{diag}(C)=0, \text{or} \quad \mathrm{B-diag}(C)=0,
 \end{align}
-其中$\|\dot\|_{\Omega}$ 为某个与指标集集合$\Omega$有关的凸范数。
+其中$\|\dot\|_{\Omega}$ 为某个与指标集集合$\Omega$有关的凸范数，
+$\mathrm{B-diag}(C)$是指将$C$按照类别排序后，同类的对角块。(\ref{eq:MatrixLasso})
+可以用ADMM算法求解~\cite{boyd2011admm}。
 \section{ADMM 算法}
-未完
+简单起见，我们将$\mathrm{diag}()$和$\mathrm{B-diag}$统一写成
+$\mathrm{diag}()$，并把(\ref{eq:MatrixLasso})改写成下面的等价形式
+\begin{align}\label{eq:MatrixLasso_modify}
+  \min_{C} \; &\|C\|_{\Omega}+\frac{\lambda}{2}\|X-XJ\|_F^2 \\
+  \text{s.t.} \;&\quad J=C-\mathrm{diag}(C).
+\end{align}
+
+在 Lagrangian 上增加一个等价的二次惩罚项得到增广Lagrangian
+\begin{align*}
+  \mathcal{L}=& \|C\|_{\Omega}+\frac{\lambda}{2}\|X-XJ\|_F^2 
+  + \frac{\mu}{2}\|J-C+\mathrm{diag}(C)\|_F^2
+  +tr(\Lambda^T(J-C+\mathrm{diag}(C))),
+\end{align*}
+其中$\Lambda$是对偶变量，$\mu$是给定参数。为了交替优化
+$J$， $C$ 和 $\Lambda$ 直到收敛，需要求解 $\partial \mathcal{L}/\partial J=0$
+和 $\partial \mathcal{L}/\partial C=0$。
+虽然目标函数关于 $C$ 不可导，但极值可以用拓展的 soft-thresholding
+算子求得~\cite{donoho1995noising}。先定义
+\begin{align*}
+  S_a(x) = \begin{cases}
+    \mathrm{0} & \|x\|_2 \le a, \\
+    (\|x\|_2 - a) \frac{x}{\|x\|_2} & \|x\|_2 > a.
+  \end{cases}
+\end{align*}
+其中$a$为给定正数，$x$为任意向量.
+再定义作用在$\R^{n\times n}$上的变换
+$\mathrm{SoftThresh}_a()$，
+对于multitasking情形，我们将矩阵的每一个行向量$x$，按照
+类别拆分成$\{x_I\}$，分别变成$S_a(x_I)$。
+对于Group LASSO就是如此作用于列向量。
+于是有算法~\ref{alg:MatrixSSC}.
+
+\begin{algorithm}[tb]
+   \caption{Matrix-LASSO-SSC}
+   \label{alg:MatrixSSC}
+\begin{algorithmic}
+   \STATE {\bfseries Input:}
+   Data points as columns in $X\in \mathbb{R}^{d\times n}$, tradeoff parameter $\lambda$, numerical parameters $\mu_0$ and $\rho$.
+   \STATE Initialize $C=0$, $J=0$, $\Lambda=0$, $k=0$.
+   \WHILE{not converged}
+   \STATE{1. } Update $J$ by
+   $$J=(\lambda X^TX+\mu_k I)^{-1}(\lambda X^TX+\mu_k C-\Lambda).$$
+   \STATE{2. } Update $C$ by
+   $$ C^{'}=\mathrm{SoftThresh}_{\frac{1}{\mu_k}}\left(J+\Lambda/\mu_k\right), $$
+   $$ C=C^{'}-\mathrm{diag}(C^{'}).$$
+   \STATE{3. } Update $\Lambda$ by
+   $$\Lambda=\Lambda+\mu_k(J-C)$$
+   \STATE{4. } Update parameter $\mu_{k+1}=\rho\mu_k.$
+   \STATE{5. } Iterate $k=k+1$;
+   \ENDWHILE
+   \STATE {\bfseries Output:} Affinity matrix $W=|C|+|C|^T$
+\end{algorithmic}
+\end{algorithm}
+
+\section{合成数据}
+\section{Hopkins155}
 \end{document}

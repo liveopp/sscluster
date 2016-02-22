@@ -5,34 +5,36 @@
 自表示的充分条件。
 
 \section{确定性模型下的分析}
-我们考虑下面的模型。令 $X^\ell$ 为第$\ell$个子空间中的点组成
-矩阵，于是
-$$ X^\ell = D_\ell A^{\ell} ,$$ 
-其中 $A^\ell$ 的每一列都在 单位球面$\S^{d_\ell-1}$ 上。
-
-在无噪音假设下，\ref{eq:group} 可以简化。我们考虑下面的优化问题
+不考虑噪音时，(\ref{eq:group}) 可以简化为
 \begin{align}
-  \P(y,M): \,\, & \min \| c\|_{\Omega} \\
-                & \mbox{s.t.}\,\, Mc = y
+  \min_{c_i} \|c_i\|_{\Omega,1} \,\, \mbox{s.t.}\,\, X_{-I}c_i = x_i.
+  \label{eq:group_nonoise}
+\end{align}
+
+为了得到(\ref{eq:group_nonoise})的正确性条件，我们考虑一般的优化问题
+\begin{align}
+  \P(y,X): \,\, & \min_c \| c\|_{\Omega,1} \\
+                & \mbox{s.t.}\,\, Xc = y
   \label{eq:group_primal}
 \end{align}
 其对偶问题为 
 \begin{align}
-  \D(y,M): \,\, &\max \,\, \langle y, \lambda\rangle \\
-                & \mbox{s.t.}\,\, \|M^T\lambda\|_{\Omega,\infty} \leq 1
+  \D(y,X): \,\, &\max_{\lambda} \,\, \langle y, \lambda\rangle \\
+                & \mbox{s.t.}\,\, \|X^T\lambda\|_{\Omega,\infty} \leq 1
 \end{align}
 其中$\|x\|_{\Omega, \infty} = \max_{I \in \Omega} \|x_I\|_2$。
 
 我们有如下引理 
 \begin{lemma}
   \label{lem:prim_dual}
-  若存在 $c$ 满足 $y = Mc$，其支撑集 $S \subseteq T$，进一步地，
+  若存在 $c$ 满足 $y = Xc$，其支撑集 $S \subseteq T$，并且，
   存在 $\lambda$ 满足
   \begin{align*}
-    [M_{S}^T \lambda]_I = \frac{c_I}{\|c_I\|_2} \, \forall I \in \Omega_S\\
-    \|M_{T\cap S^c}^T \lambda\|_{\Omega,\infty} \leq 1 \\
-    \|M_{T^c}^T \lambda\|_{\Omega,\infty} < 1
+    [X_{S}^T \lambda]_I = \frac{c_I}{\|c_I\|_2} \, \forall I \in \Omega_S\\
+    \|X_{T\cap S^c}^T \lambda\|_{\Omega,\infty} \leq 1 \\
+    \|X_{T^c}^T \lambda\|_{\Omega,\infty} < 1
   \end{align*}
+  那么$\P(y,X)$的所有最优解$c^*$在指标集$T^c$上都为0。
 \end{lemma}
 \begin{proof}
   证明类似于引理\ref{lemma:OptimalCondition}，只需要去除误差项，
@@ -40,20 +42,26 @@ $$ X^\ell = D_\ell A^{\ell} ,$$
 \end{proof}
 
 \subsection{自表示的几何条件}
-同样类似于Multitasking方法，我们构造二元组满足引理\ref{lem:prim_dual}的要求。
-令 $c_{i}^{\ell}$ 是原问题 $\P(a_i^{\ell}, A_{-i}^{\ell})$ 的解，
-$\lambda_i^{\ell}$ 为对偶问题 $\D(a_{i}^{\ell}, A_{-i}^{\ell})$.
-定义 \emph{group-dual direction} 为 $a_{i}^{\ell}$, $i = 1,2,...,N_\ell$ via 
-$$ v_i^\ell = \D^{\ell} \frac{\lambda_i^\ell}{\|\lambda_i^\ell \|_2} $$
-类似于Multitaking 情形，将$c_i^{\ell}$相应扩充（其余位置补零），令 $\nu_i^\ell
-= D^{\ell} \lambda_i^\ell$。 于是要满足引理 \ref{lem:prim_dual}
-的条件，主要要满足 
-$$ \| X^T_I \nu_i^\ell\|_2 < 1 \, \forall I \in \Omega_{-\ell},$$
-及要求
-$$\| X^T_I v_i^\ell\|_2 \|\lambda_i^\ell\|_2 < 1$$
-我们首先给出$\|\lambda_i^\ell$的上界。
 
-注意到$\lambda_i^\ell$在集合
+不是一般性的，假设数据点都在单位球面上。令 $X^\ell$ 为第$\ell$个子空间中的点组成
+矩阵，于是
+$$ X^\ell = D^{\ell} A^{\ell} ,$$ 
+其中 $A^\ell$ 的每一列都在 单位球面$\S^{d_\ell-1}$ 上，于是每个点$x_i$都有一个
+对应的$a_i$ 使得$x_i=D^{\ell}a_i$。
+
+同样类似于Multitasking方法，我们构造二元组满足引理\ref{lem:prim_dual}的要求。
+令 $c_{i}^{\ell}$ 是原问题 $\P(a_i^{\ell}, A_{-I}^{\ell})$ 的解，
+$\lambda_i^{\ell}$ 为对偶问题 $\D(a_{i}^{\ell}, A_{-I}^{\ell})$.
+定义$a_{i}^{\ell}$, $i = 1,2,...,n_\ell$ 的对偶方向向量
+$$ v_i^\ell = D^{\ell} \frac{\lambda_i^\ell}{\|\lambda_i^\ell \|_2} $$
+我们将$c_i^{\ell}$相应扩充（其余位置补零）得到$c_i$，令 $\nu_i^\ell
+= D^{\ell} \lambda_i^\ell$，则$(c_i, \nu_i)$引理 \ref{lem:prim_dual}
+的条件，除了
+$$ \| X^T_I \nu_i^\ell\|_2 < 1 \, \forall I \in \Omega_{-\ell}.$$
+上式等价于
+$$\| X^T_I v_i^\ell\|_2 \|\lambda_i^\ell\|_2 < 1$$
+
+我们必须给出$\|\lambda_i^\ell$的上界。注意到$\lambda_i^\ell$在集合
 $$P=\{ \lambda_i^\ell: \|A_{-i}^{\ell T}\|_{\Omega,\infty}\}$$
 由$P$的中心对称性，可知$P$的外接圆半径是$\|\lambda_i^\ell\|_2$的
 上界。定义集合 $P^\circ$ 为 
@@ -69,20 +77,33 @@ $$P=\{ \lambda_i^\ell: \|A_{-i}^{\ell T}\|_{\Omega,\infty}\}$$
   \left\|X_{I}^T v_i^\ell \right\|_{2} \leq r(P^\circ)
   \label{eq:cond1}
 \end{align}
-由于$r(P^\circ)$的
-\subsection{半随机生成模型}
-在做人脸图片聚类时，一个常常碰到的问题是人脸位置，会有小的偏移和误差。
-所以在进行子空间聚类前需要手工对齐，这无疑降低了聚类算法的可用性。
-利用Group LASSO的性质，我们考虑所谓的\emph{半随机生成模型}，即有$n_p$个
-参考点，它们类似于第\ref{chp:greedy}章的假设，独立同分布地采样于子空间
+
+\section{半随机生成模型}
+
+我们考虑所谓的\emph{半随机生成模型}，即有$n_p$个参考点，
+它们类似于第\ref{chp:greedy}章的假设，独立同分布地采样于子空间
 球面上的均匀分布。同时有$n_g$个线性变换$L_1, L_2,\ldots,L_{n_g}$，作用在
 参考点$w_i$ 上，得到$L_1 w_i, L_2 w_i, \ldots, L_{n_g} w_i$，总共得到
 $n_p \times n_g$个新样本点，这些样本点天然就有组别信息（那些同一个参考点
 生成的即为一组），于是可以应用Group LASSO的方法得到系数矩阵，进而转化成
 邻接矩阵。
 
-未完
-
+\begin{lemma}[\cite{soltanolkotabi2011geometric}中的引理7.5]
+\label{infnormlog}
+令 $A\in\mathbb{R}^{d_1\times N_1}$ 的每一列采样于
+$\mathbb{R}^{d_1}$单位球面上的均匀分布， $\lambda\in\R^{d_2}$ 
+采样于 $\R^{d_2}$ 单位球面上的均匀分布，并且于 $A$ 独立。
+$\Sigma\in\R^{d_1\times d_2}$ 是一个确定矩阵。
+对任意正常数 $\Delta$，我们有
+%
+$$
+\bigl\|A^T\Sigma\lambda\bigr\|_{\ell_\infty} \le4 \bigl(
+\log(N_1+1)+\log \Delta+t \bigr)\frac{\|\Sigma\|_F}{\sqrt{d_1}\sqrt {d_2}},
+$$
+%
+以不小于 $1-\frac{4}{(N_1+1)\Delta^2}e^{-2t}$ 的概率成立.
+\end{lemma}
+%
 
 
 \end{document}
